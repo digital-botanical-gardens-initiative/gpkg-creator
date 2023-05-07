@@ -23,7 +23,9 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
+from qgis.core import QgsProject, QgsVectorLayer, QgsFields, QgsField, QgsGeometry, QgsFeature, QgsCoordinateReferenceSystem
+from qgis.utils import iface
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -32,7 +34,7 @@ from .gpkg_creator_dialog import GpkgCreatorDialog
 import os.path
 
 
-class GpkgCreator:
+class GpkgCreator(QDialog):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -66,6 +68,27 @@ class GpkgCreator:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
+        QDialog.__init__(self)
+        self.setWindowTitle("GPKG Creator")
+
+        # Add the name input field
+        nameLabel = QLabel("Enter the name of the GPKG layer:")
+        self.nameLineEdit = QLineEdit()
+        self.nameLineEdit.setText("my_layer")
+        nameLayout = QVBoxLayout()
+        nameLayout.addWidget(nameLabel)
+        nameLayout.addWidget(self.nameLineEdit)
+
+        # Add the OK and Cancel buttons
+        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+
+        # Combine the layouts and add to the dialog
+        layout = QVBoxLayout()
+        layout.addLayout(nameLayout)
+        layout.addWidget(buttonBox)
+        self.setLayout(layout)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -198,3 +221,13 @@ class GpkgCreator:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
+
+    def accept(self):
+        # Create the layer
+        gpkg_file = QgsProject.instance().homePath() + "/my_gpkg.gpkg"
+        crs = iface.mapCanvas().mapSettings().destinationCrs().authid()
+        fields = QgsFields()
+        fields.append(QgsField("Name", QVariant.String))
+        writer = QgsVectorLayer(gpkg_file, self.nameLineEdit.text(), "ogr", fields, QgsWkbTypes.Point, crs)
+        QgsProject.instance().addMapLayer(writer)
+        self.close()
