@@ -231,7 +231,3 @@ class GpkgCreator(QDialog):
         writer = QgsVectorLayer(gpkg_file, self.nameLineEdit.text(), "ogr", fields, QgsWkbTypes.Point, crs)
         QgsProject.instance().addMapLayer(writer)
         self.close()
-
-def run(self):
-    dialog = GpkgCreatorDialog()
-    result = dialog.exec_()
