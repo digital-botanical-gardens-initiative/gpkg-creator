@@ -23,7 +23,7 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
+from qgis.PyQt.QtWidgets import QAction, QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton, QDialogButtonBox
 from qgis.core import QgsProject, QgsVectorLayer, QgsFields, QgsField, QgsGeometry, QgsFeature, QgsCoordinateReferenceSystem
 from qgis.utils import iface
 
