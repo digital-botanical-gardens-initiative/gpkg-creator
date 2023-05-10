@@ -8,7 +8,7 @@
                               -------------------
         begin                : 2023-05-08
         git sha              : $Format:%H$
-        copyright            : (C) 2023 by Edoouard Brülhart
+        copyright            : (C) 2023 by Edouard Brülhart
         email                : edouard.bruelhart@unifr.ch
  ***************************************************************************/
 
@@ -23,15 +23,68 @@
 """
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import *
-from qgis.core import QgsVectorLayer, QgsVectorFileWriter, QgsField, QgsProject
-from qgis.PyQt.QtCore import QVariant
+from qgis.core import QgsVectorLayer, QgsProject, QgsRelation, QgsEditorWidgetSetup
+from qgis.gui import QgsMapLayerComboBox
+from osgeo import ogr
 import os
-
-# initialize Qt resources from file resources.py
-from . import resources
 
 def classFactory(iface):
     return GpkgCreator(iface)
+
+class LayerSelectionDialog(QDialog):
+    def __init__(self, gpkg_name, parent=None):
+        super(LayerSelectionDialog, self).__init__(parent)
+        self.setWindowTitle("Select Plant's layer")
+        self.layout = QVBoxLayout()
+
+        # Create a label for GPKG name
+        self.gpkg_label = QLabel(f"GPKG name: {gpkg_name}")
+        self.layout.addWidget(self.gpkg_label)
+
+        # Create a label for layer selection
+        self.label = QLabel("Select Plant's layer:")
+        self.layout.addWidget(self.label)
+
+        # Create a layer combobox
+        self.layer_combobox = QgsMapLayerComboBox()
+        self.layout.addWidget(self.layer_combobox)
+
+        # Create a label for field selection
+        self.field_label = QLabel("Select Plant's name column in the Plant's layer:")
+        self.layout.addWidget(self.field_label)
+
+        # Create a field combobox
+        self.field_combobox = QComboBox()
+        self.layout.addWidget(self.field_combobox)
+
+        # Create a button to confirm the selection
+        self.button_ok = QPushButton("Ok")
+        self.button_ok.clicked.connect(self.accept)
+        self.layout.addWidget(self.button_ok)
+
+        self.setLayout(self.layout)
+
+        # Connect the signal to update field combobox when layer selection changes
+        self.layer_combobox.currentIndexChanged.connect(self.updateFieldComboBox)
+
+    def selectedLayer(self):
+        return self.layer_combobox.currentLayer()
+    
+    def selectedField(self):
+        return self.field_combobox.currentText()
+    
+    def updateFieldComboBox(self):
+        # Clear the field combobox
+        self.field_combobox.clear()
+
+        # Get the selected layer
+        selected_layer = self.selectedLayer()
+        if not selected_layer:
+            return
+        
+        # Get the field names from the selected layer
+        field_names = [field.name() for field in selected_layer.fields()]
+        self.field_combobox.addItems(field_names)
 
 class GpkgCreator:
     def __init__(self, iface):
@@ -39,12 +92,10 @@ class GpkgCreator:
 
     def initGui(self):
         # create action that will start plugin configuration
-        self.action = QAction(QIcon("resources:icon.png"),
+        self.action = QAction(QIcon("icon.png"),
                           "Create a DBGI geopackage",
                           self.iface.mainWindow())
-        self.action.setObjectName("testAction")
-        self.action.setWhatsThis("Configuration for test plugin")
-        self.action.setStatusTip("This is status tip")
+        
         self.action.triggered.connect(self.run)
 
         # add toolbar button and menu item
@@ -57,30 +108,114 @@ class GpkgCreator:
         self.iface.removeToolBarIcon(self.action)
 
     def run(self):
-    # ask user to enter the name of the GPKG
+        # Ask user to enter the name of the GPKG and name of the plant list
         gpkg_name, ok = QInputDialog.getText(self.iface.mainWindow(), "GPKG name", "Enter the name of the GPKG:")
         if not ok or gpkg_name == "":
             return
 
-        # create the GPKG
+        # Create the dialog to select a layer
+        dialog = LayerSelectionDialog(gpkg_name)
+        if dialog.exec_() != QDialog.Accepted:
+            return
+
+        # Get the selected layer from the dialog
+        selected_layer = dialog.selectedLayer()
+        selected_field = dialog.selectedField()
+        if not selected_layer or not selected_field:
+            return
+
+        # Retrieve layer information
+        plant_layer_name = selected_layer.name()
+        plant_layer_id = selected_layer.id()
+        
+        # Stores the project's folder
+        project_folder = QgsProject.instance().readPath("./")
+        # Creates the gpkg's path
+        gpkg_file = os.path.join(project_folder, gpkg_name + '.gpkg')
+        gpkg_file = gpkg_file.replace("\\", "/")
+        # Define the type gpkg for the layer
+        driver = ogr.GetDriverByName('GPKG')
+        # Creates the gpkg
+        ds = driver.CreateDataSource(gpkg_file)
+        # Sets the layer name (same as gpkg's name)
         layer_name = gpkg_name
-        layer_fields = [QgsField("Plant_ID", QVariant.String),
-                        QgsField("spl_code", QVariant.String),
-                        QgsField("Panel", QVariant.String),
-                        QgsField("General", QVariant.String),
-                        QgsField("Detail", QVariant.String),
-                        QgsField("Cut", QVariant.String),
-                        QgsField("Panel+Label", QVariant.String),
-                        QgsField("x_coord", QVariant.Double),
-                        QgsField("y_coord", QVariant.Double)]
-        crs = self.iface.mapCanvas().mapSettings().destinationCrs().authid()
-        gpkg_path = os.path.join(QgsProject.instance().homePath(), f"{gpkg_name}.gpkg")
-        gpkg_layer = QgsVectorLayer(f"Point?crs={crs}&field=name:string(50)&field=value:double", layer_name, "ogr")
-        gpkg_layer_provider = gpkg_layer.dataProvider()
+        #sets the layer's srs
+        project_crs = QgsProject.instance().crs()
+        crs_wkt = project_crs.toWkt()
+        srs = ogr.osr.SpatialReference()
+        srs.ImportFromWkt(crs_wkt)
+        #Sets the layer geometry type (here point)
+        geom_type = ogr.wkbPoint
+        #Creates the layer
+        layer = ds.CreateLayer(layer_name, srs, geom_type)
 
-        # add the fields to the layer
-        gpkg_layer_provider.addAttributes(layer_fields)
-        gpkg_layer.updateFields()
+        #Creation of the layer's fields
+        field_def1 = ogr.FieldDefn("Plant_ID", ogr.OFTString)
+        field_def1.SetWidth(200)
+        layer.CreateField(field_def1)
 
-        # add the layer to the project
-        QgsProject.instance().addMapLayer(gpkg_layer)
+        field_def2 = ogr.FieldDefn("spl_code", ogr.OFTString)
+        field_def2.SetWidth(15)
+        layer.CreateField(field_def2)
+
+        field_def3 = ogr.FieldDefn("Panel", ogr.OFTString)
+        field_def3.SetWidth(200)
+        layer.CreateField(field_def3)
+
+        field_def4 = ogr.FieldDefn("General", ogr.OFTString)
+        field_def4.SetWidth(200)
+        layer.CreateField(field_def4)
+
+        field_def5 = ogr.FieldDefn("Detail", ogr.OFTString)
+        field_def5.SetWidth(200)
+        layer.CreateField(field_def5)
+
+        field_def6 = ogr.FieldDefn("Cut", ogr.OFTString)
+        field_def6.SetWidth(200)
+        layer.CreateField(field_def6)
+
+        field_def7 = ogr.FieldDefn("Panel+Label", ogr.OFTString)
+        field_def7.SetWidth(200)
+        layer.CreateField(field_def7)
+
+        field_def8 = ogr.FieldDefn("x_coord", ogr.OFTReal)
+        field_def8.SetPrecision(0)
+        layer.CreateField(field_def8)
+
+        field_def9 = ogr.FieldDefn("y_coord", ogr.OFTReal)
+        field_def9.SetPrecision(0)
+        layer.CreateField(field_def9)
+
+        #Close the GeoPackage file
+        ds = None
+
+        # Load the GeoPackage file as a vector layer in QGIS
+        imp_layer = QgsVectorLayer(gpkg_file + "|layername=" + layer_name, layer_name, "ogr")
+
+        # Check if the layer was loaded successfully
+        if imp_layer.isValid():
+            QgsProject.instance().addMapLayer(imp_layer)
+            print('Layer loaded successfully.')
+        else:
+            print('Layer could not be loaded.')
+       
+        #Create association relation between plant layer and Plant_ID field
+        imp_layer_id = imp_layer.id()
+        imp_layer_field = "Plant_ID"
+        relation = QgsRelation()
+        relation.setReferencingLayer(imp_layer_id)
+        relation.setReferencedLayer(plant_layer_id)
+        relation.addFieldPair(imp_layer_field, selected_field)
+        relation.setId(layer_name)
+        relation.setName(layer_name)
+        print(relation.isValid())
+        QgsProject.instance().relationManager().addRelation(relation)
+
+        print('Relation added successfully.')
+
+        ##Change widget type for all fields
+        layer = QgsProject.instance().mapLayer(imp_layer_id)
+
+        #Plant_ID
+        setup1 = QgsEditorWidgetSetup('RelationReference', {'Display expression': selected_field, 'Relation': f'{layer_name}({plant_layer_id})'})
+        layer.setEditorWidgetSetup(2, setup1)
