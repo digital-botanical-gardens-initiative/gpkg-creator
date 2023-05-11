@@ -23,7 +23,7 @@
 """
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import *
-from qgis.core import QgsVectorLayer, QgsProject, QgsRelation, QgsEditorWidgetSetup
+from qgis.core import QgsVectorLayer, QgsProject, QgsRelation, QgsEditorWidgetSetup, QgsFieldConstraints, QgsDefaultValue, QgsSettings, QgsFieldExpressionWidget
 from qgis.gui import QgsMapLayerComboBox
 from osgeo import ogr
 import os
@@ -106,6 +106,15 @@ class GpkgCreator:
         # remove the plugin menu item and icon
         self.iface.removePluginVectorMenu("&DBGI Geopackage Creator", self.action)
         self.iface.removeToolBarIcon(self.action)
+
+    def set_attachment_naming_expression(layer, naming_expression):
+        # Iterate through the fields in the layer
+        for field in layer.fields():
+            # Check if the field has an Attachment widget type
+            if field.typeName() == 'Attachment':
+                # Set the naming expression for the attachment field
+                layer.setAttachmentNamingExpression(field.name(), naming_expression)
+
 
     def run(self):
         # Ask user to enter the name of the GPKG and name of the plant list
@@ -208,14 +217,54 @@ class GpkgCreator:
         relation.addFieldPair(imp_layer_field, selected_field)
         relation.setId(layer_name)
         relation.setName(layer_name)
-        print(relation.isValid())
         QgsProject.instance().relationManager().addRelation(relation)
 
         print('Relation added successfully.')
 
         ##Change widget type for all fields
         layer = QgsProject.instance().mapLayer(imp_layer_id)
-
+ 
         #Plant_ID
-        setup1 = QgsEditorWidgetSetup('RelationReference', {'Display expression': selected_field, 'Relation': f'{layer_name}({plant_layer_id})'})
-        layer.setEditorWidgetSetup(2, setup1)
+        #rel_ref = QgsEditorWidgetSetup('RelationReference', {'Display expression': selected_field, 'Relation': f'{layer_name}({plant_layer_id})'})
+        #layer.setEditorWidgetSetup(1, rel_ref)
+        layer.setFieldConstraint(1, QgsFieldConstraints.ConstraintNotNull) #loads the layer
+        attach = QgsEditorWidgetSetup('ExternalResource', {}) #Defines attachment widget type
+        #spl_code
+        expr_constr = 'regexp_match(to_string("spl_code"), \'dbgi_[0-9]{6}\')'
+        layer.setFieldConstraint(2, QgsFieldConstraints.ConstraintNotNull)
+        layer.setFieldConstraint(2, QgsFieldConstraints.ConstraintUnique)
+        layer.setConstraintExpression(2, expr_constr)
+
+        #Panel
+        naming_expression1 = "'DCIM/" + layer_name + "/' || Plant_ID || '_' || spl_code || '_' || '01' || '.jpg'"
+        layer.setFieldConstraint(3, QgsFieldConstraints.ConstraintNotNull)
+        layer.setEditorWidgetSetup(3, attach)
+
+        #General
+        layer.setFieldConstraint(4, QgsFieldConstraints.ConstraintNotNull)
+        layer.setEditorWidgetSetup(4, attach)
+
+        #Detail
+        layer.setFieldConstraint(5, QgsFieldConstraints.ConstraintNotNull)
+        layer.setEditorWidgetSetup(5, attach)
+
+        #Cut
+        layer.setFieldConstraint(6, QgsFieldConstraints.ConstraintNotNull)
+        layer.setEditorWidgetSetup(6, attach)
+
+        #Panel+label
+        layer.setFieldConstraint(7, QgsFieldConstraints.ConstraintNotNull)
+        layer.setEditorWidgetSetup(7, attach)
+        #x_coord
+        coord_x = QgsDefaultValue("$x")
+        layer.setDefaultValueDefinition(8, coord_x)
+
+        #y_coord
+        coord_y = QgsDefaultValue("$y")
+        layer.setDefaultValueDefinition(9, coord_y)
+        
+
+        set_attachment_naming_expression(layer, naming_expression1)
+        
+
+        
