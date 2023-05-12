@@ -5,16 +5,4 @@
 
 Welcome to GpkgCreator's documentation!
 ============================================
-
-Contents:
-
-.. toctree::
-   :maxdepth: 2
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+Please refer to: https://github.com/digital-botanical-gardens-initiative/gpkg_creator#readme
