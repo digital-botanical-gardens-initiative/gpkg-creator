@@ -1,4 +1,4 @@
-# gpkg_creator
+# DBGI QGIS plugin
 
 QGIS plugin that creates a suited geopackage for the DBGI project. 
 
