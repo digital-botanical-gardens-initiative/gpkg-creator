@@ -10,7 +10,10 @@ version=0.1
 author=Edouard Brülhart
 email=edouard.bruelhart@unifr.ch
 
-about=Creates geopackages that match the requirements for the DBGI project
+about=This plugin creates geopackages that match the requirements for the DBGI project. Takes three arguments:
+    1. The name of your geopackage
+    2. The name of a CSV or geopackage file rhat contains the binomial nomenclature of the species you will collect (must be loaded on the project)
+    3. The column name containing the binomial nomenclature in the CSV or geopackage file
 
 tracker=https://github.com/digital-botanical-gardens-initiative/gpkg_creator/issues
 repository=https://github.com/digital-botanical-gardens-initiative/gpkg_creator
@@ -23,7 +26,7 @@ hasProcessingProvider=no
 changelog=0.1 - First release
 
 # Tags are comma separated with spaces allowed
-tags=gpkg, DBGI
+tags=dbgi, geopackage, gpkg
 
 homepage=https://www.dbgi.org/dendron-dbgi/
 category=Vector
@@ -37,7 +40,7 @@ deprecated=False
 # Since QGIS 3.8, a comma separated list of plugins to be installed
 # (or upgraded) can be specified.
 # Check the documentation for more information.
-# plugin_dependencies=
+# plugin_dependencies=Field Sync
 
 # If the plugin can run on QGIS Server.
 server=False
