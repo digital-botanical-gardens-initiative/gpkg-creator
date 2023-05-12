@@ -32,6 +32,7 @@ import json
 def classFactory(iface):
     return GpkgCreator(iface)
 
+#Creates the selection dialog for binomial nomenclature item
 class LayerSelectionDialog(QDialog):
     def __init__(self, gpkg_name, parent=None):
         super(LayerSelectionDialog, self).__init__(parent)
@@ -68,9 +69,11 @@ class LayerSelectionDialog(QDialog):
         # Connect the signal to update field combobox when layer selection changes
         self.layer_combobox.currentIndexChanged.connect(self.updateFieldComboBox)
 
+    #Gives the selected binomial nomenclature item
     def selectedLayer(self):
         return self.layer_combobox.currentLayer()
     
+    #Gives the selected binomial nomenclature item's field
     def selectedField(self):
         return self.field_combobox.currentText()
     
@@ -93,20 +96,18 @@ class GpkgCreator:
 
     def initGui(self):
         # create action that will start plugin configuration
-        self.action = QAction(QIcon("icon.png"),
+        self.action = QAction(
                           "Create a DBGI geopackage",
                           self.iface.mainWindow())
         
         self.action.triggered.connect(self.run)
 
-        # add toolbar button and menu item
-        self.iface.addToolBarIcon(self.action)
+        # add toolbar button
         self.iface.addPluginToVectorMenu("&DBGI", self.action)
 
     def unload(self):
-        # remove the plugin menu item and icon
+        # remove the toolbar button
         self.iface.removePluginVectorMenu("&DBGI", self.action)
-        self.iface.removeToolBarIcon(self.action)
 
     def run(self):
         # Ask user to enter the name of the GPKG and name of the plant list
@@ -126,7 +127,6 @@ class GpkgCreator:
             return
 
         # Retrieve layer information
-        plant_layer_name = selected_layer.name()
         plant_layer_id = selected_layer.id()
         
         # Stores the project's folder
@@ -192,12 +192,9 @@ class GpkgCreator:
 
         # Load the GeoPackage file as a vector layer in QGIS
         imp_layer = QgsVectorLayer(gpkg_file + "|layername=" + layer_name, layer_name, "ogr")
-
-        # Check if the layer was loaded successfully
         QgsProject.instance().addMapLayer(imp_layer)
-
        
-        #Create association relation between plant layer and Plant_ID field
+        #Create association relation between binomial nomenclature layer and sample_name field
         imp_layer_id = imp_layer.id()
         imp_layer_field = "sample_name"
         relation = QgsRelation()
@@ -208,48 +205,48 @@ class GpkgCreator:
         relation.setName(layer_name)
         QgsProject.instance().relationManager().addRelation(relation)
 
-        ##Change widget type and constraints for all fields
+        ##Defines the layer to change field properties
         layer = QgsProject.instance().mapLayer(imp_layer_id)
  
-        #Plant_ID
-        #rel_ref = QgsEditorWidgetSetup('RelationReference', {'Display expression': selected_field, 'Relation': f'{layer_name}({plant_layer_id})'})
-        #layer.setEditorWidgetSetup(1, rel_ref)
+        #sample_name field properties
         layer.setFieldConstraint(1, QgsFieldConstraints.ConstraintNotNull) #loads the layer
         attach = QgsEditorWidgetSetup('ExternalResource', {}) #Defines attachment widget type
-        #spl_code
+
+        #sample_id field properties
         expr_constr = 'regexp_match(to_string("sample_id"), \'dbgi_[0-9]{6}\')'
         layer.setFieldConstraint(2, QgsFieldConstraints.ConstraintNotNull)
         layer.setFieldConstraint(2, QgsFieldConstraints.ConstraintUnique)
         layer.setConstraintExpression(2, expr_constr)
 
-        #Panel
+        #picture_panel field properties
         layer.setFieldConstraint(3, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(3, attach)
 
-        #General
+        #picture_general field properties
         layer.setFieldConstraint(4, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(4, attach)
 
-        #Detail
+        #picture_detail field properties
         layer.setFieldConstraint(5, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(5, attach)
 
-        #Cut
+        #picture_cut field properties
         layer.setFieldConstraint(6, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(6, attach)
 
-        #Panel+label
+        #picture_panel_label field properties
         layer.setFieldConstraint(7, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(7, attach)
-        #x_coord
+
+        #x_coord field properties
         coord_x = QgsDefaultValue("$x")
         layer.setDefaultValueDefinition(8, coord_x)
 
-        #y_coord
+        #y_coord field properties
         coord_y = QgsDefaultValue("$y")
         layer.setDefaultValueDefinition(9, coord_y)
 
-        #Change picture naming for the five concerned fields
+        #Change picture naming for the five concerned fields for QField
         custom_property_key = "QFieldSync/attachment_naming"
         rename_1 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '01' || '.jpg'"
         rename_2 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '02' || '.jpg'"
@@ -265,7 +262,6 @@ class GpkgCreator:
         }
         custom_property_json = json.dumps(custom_property_values)
         layer.setCustomProperty(custom_property_key, custom_property_json)
-        #layer.triggerRepaint()
 
         #Display label for the points
         label = QgsPalLayerSettings()
