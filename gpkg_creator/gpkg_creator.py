@@ -217,7 +217,7 @@ class GpkgCreator:
         layer.setFieldConstraint(1, QgsFieldConstraints.ConstraintNotNull) #loads the layer
         attach = QgsEditorWidgetSetup('ExternalResource', {}) #Defines attachment widget type
         #spl_code
-        expr_constr = 'regexp_match(to_string("spl_code"), \'dbgi_[0-9]{6}\')'
+        expr_constr = 'regexp_match(to_string("sample_id"), \'dbgi_[0-9]{6}\')'
         layer.setFieldConstraint(2, QgsFieldConstraints.ConstraintNotNull)
         layer.setFieldConstraint(2, QgsFieldConstraints.ConstraintUnique)
         layer.setConstraintExpression(2, expr_constr)
