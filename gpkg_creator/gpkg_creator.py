@@ -23,10 +23,11 @@
 """
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import *
-from qgis.core import QgsVectorLayer, QgsProject, QgsRelation, QgsEditorWidgetSetup, QgsFieldConstraints, QgsDefaultValue, QgsSettings, QgsFieldExpressionWidget
+from qgis.core import QgsVectorLayer, QgsProject, QgsRelation, QgsEditorWidgetSetup, QgsFieldConstraints, QgsDefaultValue, QgsPalLayerSettings, QgsVectorLayerSimpleLabeling
 from qgis.gui import QgsMapLayerComboBox
 from osgeo import ogr
 import os
+import json
 
 def classFactory(iface):
     return GpkgCreator(iface)
@@ -34,7 +35,7 @@ def classFactory(iface):
 class LayerSelectionDialog(QDialog):
     def __init__(self, gpkg_name, parent=None):
         super(LayerSelectionDialog, self).__init__(parent)
-        self.setWindowTitle("Select Plant's layer")
+        self.setWindowTitle("Select identification's layer")
         self.layout = QVBoxLayout()
 
         # Create a label for GPKG name
@@ -42,7 +43,7 @@ class LayerSelectionDialog(QDialog):
         self.layout.addWidget(self.gpkg_label)
 
         # Create a label for layer selection
-        self.label = QLabel("Select Plant's layer:")
+        self.label = QLabel("Select identification's layer:")
         self.layout.addWidget(self.label)
 
         # Create a layer combobox
@@ -50,7 +51,7 @@ class LayerSelectionDialog(QDialog):
         self.layout.addWidget(self.layer_combobox)
 
         # Create a label for field selection
-        self.field_label = QLabel("Select Plant's name column in the Plant's layer:")
+        self.field_label = QLabel("Select identification's name column in the identification's layer:")
         self.layout.addWidget(self.field_label)
 
         # Create a field combobox
@@ -58,7 +59,7 @@ class LayerSelectionDialog(QDialog):
         self.layout.addWidget(self.field_combobox)
 
         # Create a button to confirm the selection
-        self.button_ok = QPushButton("Ok")
+        self.button_ok = QPushButton("OK")
         self.button_ok.clicked.connect(self.accept)
         self.layout.addWidget(self.button_ok)
 
@@ -100,21 +101,12 @@ class GpkgCreator:
 
         # add toolbar button and menu item
         self.iface.addToolBarIcon(self.action)
-        self.iface.addPluginToVectorMenu("&DBGI Geopackage Creator", self.action)
+        self.iface.addPluginToVectorMenu("&DBGI", self.action)
 
     def unload(self):
         # remove the plugin menu item and icon
-        self.iface.removePluginVectorMenu("&DBGI Geopackage Creator", self.action)
+        self.iface.removePluginVectorMenu("&DBGI", self.action)
         self.iface.removeToolBarIcon(self.action)
-
-    def set_attachment_naming_expression(layer, naming_expression):
-        # Iterate through the fields in the layer
-        for field in layer.fields():
-            # Check if the field has an Attachment widget type
-            if field.typeName() == 'Attachment':
-                # Set the naming expression for the attachment field
-                layer.setAttachmentNamingExpression(field.name(), naming_expression)
-
 
     def run(self):
         # Ask user to enter the name of the GPKG and name of the plant list
@@ -159,31 +151,31 @@ class GpkgCreator:
         layer = ds.CreateLayer(layer_name, srs, geom_type)
 
         #Creation of the layer's fields
-        field_def1 = ogr.FieldDefn("Plant_ID", ogr.OFTString)
+        field_def1 = ogr.FieldDefn("sample_name", ogr.OFTString)
         field_def1.SetWidth(200)
         layer.CreateField(field_def1)
 
-        field_def2 = ogr.FieldDefn("spl_code", ogr.OFTString)
+        field_def2 = ogr.FieldDefn("sample_id", ogr.OFTString)
         field_def2.SetWidth(15)
         layer.CreateField(field_def2)
 
-        field_def3 = ogr.FieldDefn("Panel", ogr.OFTString)
+        field_def3 = ogr.FieldDefn("picture_panel", ogr.OFTString)
         field_def3.SetWidth(200)
         layer.CreateField(field_def3)
 
-        field_def4 = ogr.FieldDefn("General", ogr.OFTString)
+        field_def4 = ogr.FieldDefn("picture_general", ogr.OFTString)
         field_def4.SetWidth(200)
         layer.CreateField(field_def4)
 
-        field_def5 = ogr.FieldDefn("Detail", ogr.OFTString)
+        field_def5 = ogr.FieldDefn("picture_detail", ogr.OFTString)
         field_def5.SetWidth(200)
         layer.CreateField(field_def5)
 
-        field_def6 = ogr.FieldDefn("Cut", ogr.OFTString)
+        field_def6 = ogr.FieldDefn("picture_cut", ogr.OFTString)
         field_def6.SetWidth(200)
         layer.CreateField(field_def6)
 
-        field_def7 = ogr.FieldDefn("Panel+Label", ogr.OFTString)
+        field_def7 = ogr.FieldDefn("picture_panel_label", ogr.OFTString)
         field_def7.SetWidth(200)
         layer.CreateField(field_def7)
 
@@ -202,15 +194,12 @@ class GpkgCreator:
         imp_layer = QgsVectorLayer(gpkg_file + "|layername=" + layer_name, layer_name, "ogr")
 
         # Check if the layer was loaded successfully
-        if imp_layer.isValid():
-            QgsProject.instance().addMapLayer(imp_layer)
-            print('Layer loaded successfully.')
-        else:
-            print('Layer could not be loaded.')
+        QgsProject.instance().addMapLayer(imp_layer)
+
        
         #Create association relation between plant layer and Plant_ID field
         imp_layer_id = imp_layer.id()
-        imp_layer_field = "Plant_ID"
+        imp_layer_field = "sample_name"
         relation = QgsRelation()
         relation.setReferencingLayer(imp_layer_id)
         relation.setReferencedLayer(plant_layer_id)
@@ -219,9 +208,7 @@ class GpkgCreator:
         relation.setName(layer_name)
         QgsProject.instance().relationManager().addRelation(relation)
 
-        print('Relation added successfully.')
-
-        ##Change widget type for all fields
+        ##Change widget type and constraints for all fields
         layer = QgsProject.instance().mapLayer(imp_layer_id)
  
         #Plant_ID
@@ -236,7 +223,6 @@ class GpkgCreator:
         layer.setConstraintExpression(2, expr_constr)
 
         #Panel
-        naming_expression1 = "'DCIM/" + layer_name + "/' || Plant_ID || '_' || spl_code || '_' || '01' || '.jpg'"
         layer.setFieldConstraint(3, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(3, attach)
 
@@ -262,9 +248,34 @@ class GpkgCreator:
         #y_coord
         coord_y = QgsDefaultValue("$y")
         layer.setDefaultValueDefinition(9, coord_y)
-        
 
-        set_attachment_naming_expression(layer, naming_expression1)
-        
+        #Change picture naming for the five concerned fields
+        custom_property_key = "QFieldSync/attachment_naming"
+        rename_1 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '01' || '.jpg'"
+        rename_2 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '02' || '.jpg'"
+        rename_3 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '03' || '.jpg'"
+        rename_4 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '04' || '.jpg'"
+        rename_5 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '05' || '.jpg'"
+        custom_property_values = {
+            "picture_panel": rename_1,
+            "picture_general": rename_2,
+            "picture_detail": rename_3,
+            "picture_cut": rename_4,
+            "picture_panel_label": rename_5
+        }
+        custom_property_json = json.dumps(custom_property_values)
+        layer.setCustomProperty(custom_property_key, custom_property_json)
+        #layer.triggerRepaint()
 
-        
+        #Display label for the points
+        label = QgsPalLayerSettings()
+        label.fieldName = "sample_id"
+        label.textcolor = QColor(0, 0, 0)
+        label.placement = QgsPalLayerSettings.OverPoint
+        layer.setLabelsEnabled(True)
+        layer.setLabeling(QgsVectorLayerSimpleLabeling(label))
+
+        #Show feature count
+        root = QgsProject.instance().layerTreeRoot()
+        layer_node = root.findLayer(imp_layer.id())
+        layer_node.setCustomProperty("showFeatureCount", 1)
