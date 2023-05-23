@@ -28,7 +28,7 @@ changelog=0.1 - First release
 # Tags are comma separated with spaces allowed
 tags=dbgi, geopackage, gpkg
 
-homepage=https://www.dbgi.org/dendron-dbgi/
+homepage=https://www.dbgi.org/dendron-dbgi/notes/1u37mlza55e6dgksabcv7qn/
 category=Vector
 icon=icon.png
 # experimental flag
