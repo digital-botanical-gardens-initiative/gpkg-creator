@@ -150,42 +150,84 @@ class GpkgCreator:
         #Creates the layer
         layer = ds.CreateLayer(layer_name, srs, geom_type)
 
-        #Creation of the layer's fields
+        #Creation of the sample metadata fields
         field_def1 = ogr.FieldDefn("sample_name", ogr.OFTString)
         field_def1.SetWidth(200)
         layer.CreateField(field_def1)
 
-        field_def2 = ogr.FieldDefn("sample_id", ogr.OFTString)
-        field_def2.SetWidth(15)
+        field_def2 = ogr.FieldDefn("no_name_on_list", ogr.OFTBoolean)
+        #field_def2.SetWidth(200)
         layer.CreateField(field_def2)
 
-        field_def3 = ogr.FieldDefn("picture_panel", ogr.OFTString)
+        field_def3 = ogr.FieldDefn("name_proposition", ogr.OFTString)
         field_def3.SetWidth(200)
         layer.CreateField(field_def3)
 
-        field_def4 = ogr.FieldDefn("picture_general", ogr.OFTString)
-        field_def4.SetWidth(200)
+        field_def4 = ogr.FieldDefn("sample_id", ogr.OFTString)
+        field_def4.SetWidth(15)
         layer.CreateField(field_def4)
 
-        field_def5 = ogr.FieldDefn("picture_detail", ogr.OFTString)
+        field_def5 = ogr.FieldDefn("picture_panel", ogr.OFTString)
         field_def5.SetWidth(200)
         layer.CreateField(field_def5)
 
-        field_def6 = ogr.FieldDefn("picture_cut", ogr.OFTString)
+        field_def6 = ogr.FieldDefn("picture_general", ogr.OFTString)
         field_def6.SetWidth(200)
         layer.CreateField(field_def6)
 
-        field_def7 = ogr.FieldDefn("picture_panel_label", ogr.OFTString)
+        field_def7 = ogr.FieldDefn("picture_detail", ogr.OFTString)
         field_def7.SetWidth(200)
         layer.CreateField(field_def7)
 
-        field_def8 = ogr.FieldDefn("x_coord", ogr.OFTReal)
-        field_def8.SetPrecision(0)
+        field_def8 = ogr.FieldDefn("picture_cut", ogr.OFTString)
+        field_def8.SetWidth(200)
         layer.CreateField(field_def8)
 
-        field_def9 = ogr.FieldDefn("y_coord", ogr.OFTReal)
-        field_def9.SetPrecision(0)
+        field_def9 = ogr.FieldDefn("picture_panel_label", ogr.OFTString)
+        field_def9.SetWidth(200)
         layer.CreateField(field_def9)
+        
+        field_def10 = ogr.FieldDefn("picture_free", ogr.OFTString)
+        field_def10.SetWidth(200)
+        layer.CreateField(field_def10)
+
+        field_def11 = ogr.FieldDefn("x_coord", ogr.OFTReal)
+        field_def11.SetPrecision(0)
+        layer.CreateField(field_def11)
+
+        field_def12 = ogr.FieldDefn("y_coord", ogr.OFTReal)
+        field_def12.SetPrecision(0)
+        layer.CreateField(field_def12)
+
+        #Creation of the individual metadata fields
+        field_def13 = ogr.FieldDefn("ipen", ogr.OFTString)
+        field_def13.SetWidth(200)
+        layer.CreateField(field_def13)
+
+        field_def14 = ogr.FieldDefn("herbivory_(percent)", ogr.OFTInteger)
+        #field_def14.SetWidth(200)
+        layer.CreateField(field_def14)
+
+        field_def15 = ogr.FieldDefn("comment_eco", ogr.OFTString)
+        field_def15.SetWidth(1000)
+        layer.CreateField(field_def15)
+
+        #Creation of the environmental metadata fields
+        field_def16 = ogr.FieldDefn("soil_type", ogr.OFTString)
+        field_def16.SetWidth(200)
+        layer.CreateField(field_def16)
+
+        field_def17 = ogr.FieldDefn("weather", ogr.OFTString)
+        field_def17.SetWidth(200)
+        layer.CreateField(field_def17)
+
+        field_def18 = ogr.FieldDefn("temperature_(°C)", ogr.OFTReal)
+        field_def18.SetPrecision(0)
+        layer.CreateField(field_def18)
+
+        field_def19 = ogr.FieldDefn("comment_env", ogr.OFTString)
+        field_def19.SetWidth(1000)
+        layer.CreateField(field_def19)
 
         #Close the GeoPackage file
         ds = None
@@ -205,12 +247,18 @@ class GpkgCreator:
         relation.setName(layer_name)
         QgsProject.instance().relationManager().addRelation(relation)
 
-        ##Defines the layer to change field properties
+        #Define the layer to change field properties
         layer = QgsProject.instance().mapLayer(imp_layer_id)
+
+        #Define attachment type
+        attach = QgsEditorWidgetSetup('ExternalResource', {}) #Defines attachment widget type
  
         #sample_name field properties
-        layer.setFieldConstraint(1, QgsFieldConstraints.ConstraintNotNull) #loads the layer
-        attach = QgsEditorWidgetSetup('ExternalResource', {}) #Defines attachment widget type
+        layer.setFieldConstraint(1, QgsFieldConstraints.ConstraintNotNull)
+
+        #no_name_on_list field properties
+
+        #name_proposition field properties
 
         #sample_id field properties
         expr_constr = 'regexp_match(to_string("sample_id"), \'dbgi_[0-9]{6}\')'
@@ -238,6 +286,8 @@ class GpkgCreator:
         layer.setFieldConstraint(7, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(7, attach)
 
+        #picture_free field properties
+
         #x_coord field properties
         coord_x = QgsDefaultValue("$x")
         layer.setDefaultValueDefinition(8, coord_x)
@@ -246,6 +296,22 @@ class GpkgCreator:
         coord_y = QgsDefaultValue("$y")
         layer.setDefaultValueDefinition(9, coord_y)
 
+        #ipen field properties
+        
+        #herbivory_(percent) field properties
+
+        #comment_eco field properties
+
+        #soil_type field properties
+
+        #weather field properties
+
+        #temperature_(°C) field properties
+
+        #comment_env field properties
+
+
+
         #Change picture naming for the five concerned fields for QField
         custom_property_key = "QFieldSync/attachment_naming"
         rename_1 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '01' || '.jpg'"
@@ -253,12 +319,14 @@ class GpkgCreator:
         rename_3 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '03' || '.jpg'"
         rename_4 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '04' || '.jpg'"
         rename_5 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '05' || '.jpg'"
+        rename_6 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '06' || '.jpg'"
         custom_property_values = {
             "picture_panel": rename_1,
             "picture_general": rename_2,
             "picture_detail": rename_3,
             "picture_cut": rename_4,
-            "picture_panel_label": rename_5
+            "picture_panel_label": rename_5,
+            "picture_free": rename_6
         }
         custom_property_json = json.dumps(custom_property_values)
         layer.setCustomProperty(custom_property_key, custom_property_json)

@@ -3,7 +3,7 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=DBGI
+name=DBGI_test
 qgisMinimumVersion=3.0
 description=Creates geopackages that match the requirements for the DBGI project
 version=0.1
