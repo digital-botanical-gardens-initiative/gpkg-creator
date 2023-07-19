@@ -23,7 +23,7 @@
 """
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import *
-from qgis.core import QgsVectorLayer, QgsProject, QgsRelation, QgsEditorWidgetSetup, QgsFieldConstraints, QgsDefaultValue, QgsPalLayerSettings, QgsVectorLayerSimpleLabeling
+from qgis.core import QgsVectorLayer, QgsProject, QgsRelation, QgsEditorWidgetSetup, QgsFieldConstraints, QgsDefaultValue, QgsPalLayerSettings, QgsVectorLayerSimpleLabeling, QgsAttributeEditorContainer, QgsAttributeEditorField, QgsOptionalExpression, QgsExpression
 from qgis.gui import QgsMapLayerComboBox
 from osgeo import ogr
 import os
@@ -155,7 +155,7 @@ class GpkgCreator:
         field_def1.SetWidth(200)
         layer.CreateField(field_def1)
 
-        field_def2 = ogr.FieldDefn("no_name_on_list", ogr.OFTBoolean)
+        field_def2 = ogr.FieldDefn("no_name_on_list", ogr.OFTInteger)
         #field_def2.SetWidth(200)
         layer.CreateField(field_def2)
 
@@ -250,76 +250,111 @@ class GpkgCreator:
         #Define the layer to change field properties
         layer = QgsProject.instance().mapLayer(imp_layer_id)
 
-        #Define attachment type
+        #Define different widget types
         attach = QgsEditorWidgetSetup('ExternalResource', {}) #Defines attachment widget type
- 
+        checkbox = QgsEditorWidgetSetup('CheckBox', {'CheckedState': 1, 'UncheckedState': 0})
+        range = QgsEditorWidgetSetup('Range', {
+            'AllowNull': True,
+            'Max': 100,
+            'Min': 0,
+            'Step': 1,
+            'Style': 'Slider'
+        }
+        )
+        form_soil = QgsEditorWidgetSetup('ValueMap', 
+                                         {'map': {
+                                             "sandy soil": "sandy soil",
+                                             "loamy soil": "loamy soil",
+                                             "clay soil": "clay soil",
+                                             "humus soil": "humus soil"
+                                             }
+                                             }
+                                             )
+        
+        form_weather = QgsEditorWidgetSetup('ValueMap',
+                                         {'map': {
+                                             "sunny": "sunny",
+                                             "cloudy": "cloudy",
+                                             "rainy": "rainy",
+                                             "snowy": "snowy",
+                                             "foggy": "foggy"
+                                             }
+                                             }
+                                             )
+
         #sample_name field properties
         layer.setFieldConstraint(1, QgsFieldConstraints.ConstraintNotNull)
 
         #no_name_on_list field properties
+        layer.setEditorWidgetSetup(2, checkbox)
+        layer.setDefaultValueDefinition(2, QgsDefaultValue('0'))
 
         #name_proposition field properties
+        expr_constr_name = 'CASE WHEN "no_name_on_list" = 0 THEN "name_proposition" IS NULL ELSE "name_proposition" IS NOT NULL END'
+        layer.setConstraintExpression(3, expr_constr_name)
 
         #sample_id field properties
         expr_constr = 'regexp_match(to_string("sample_id"), \'dbgi_[0-9]{6}\')'
-        layer.setFieldConstraint(2, QgsFieldConstraints.ConstraintNotNull)
-        layer.setFieldConstraint(2, QgsFieldConstraints.ConstraintUnique)
-        layer.setConstraintExpression(2, expr_constr)
+        layer.setFieldConstraint(4, QgsFieldConstraints.ConstraintNotNull)
+        layer.setFieldConstraint(4, QgsFieldConstraints.ConstraintUnique)
+        layer.setConstraintExpression(4, expr_constr)
 
         #picture_panel field properties
-        layer.setFieldConstraint(3, QgsFieldConstraints.ConstraintNotNull)
-        layer.setEditorWidgetSetup(3, attach)
-
-        #picture_general field properties
-        layer.setFieldConstraint(4, QgsFieldConstraints.ConstraintNotNull)
-        layer.setEditorWidgetSetup(4, attach)
-
-        #picture_detail field properties
         layer.setFieldConstraint(5, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(5, attach)
 
-        #picture_cut field properties
+        #picture_general field properties
         layer.setFieldConstraint(6, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(6, attach)
 
-        #picture_panel_label field properties
+        #picture_detail field properties
         layer.setFieldConstraint(7, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(7, attach)
 
+        #picture_cut field properties
+        layer.setFieldConstraint(8, QgsFieldConstraints.ConstraintNotNull)
+        layer.setEditorWidgetSetup(8, attach)
+
+        #picture_panel_label field properties
+        layer.setFieldConstraint(9, QgsFieldConstraints.ConstraintNotNull)
+        layer.setEditorWidgetSetup(9, attach)
+
         #picture_free field properties
+        layer.setEditorWidgetSetup(10, attach)
 
         #x_coord field properties
         coord_x = QgsDefaultValue("$x")
-        layer.setDefaultValueDefinition(8, coord_x)
+        layer.setDefaultValueDefinition(11, coord_x)
 
         #y_coord field properties
         coord_y = QgsDefaultValue("$y")
-        layer.setDefaultValueDefinition(9, coord_y)
+        layer.setDefaultValueDefinition(12, coord_y)
 
         #ipen field properties
         
         #herbivory_(percent) field properties
+        layer.setEditorWidgetSetup(14, range)
 
         #comment_eco field properties
 
         #soil_type field properties
+        layer.setEditorWidgetSetup(16, form_soil)
 
         #weather field properties
+        layer.setEditorWidgetSetup(17, form_weather)
 
         #temperature_(°C) field properties
 
         #comment_env field properties
 
-
-
         #Change picture naming for the five concerned fields for QField
         custom_property_key = "QFieldSync/attachment_naming"
-        rename_1 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '01' || '.jpg'"
-        rename_2 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '02' || '.jpg'"
-        rename_3 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '03' || '.jpg'"
-        rename_4 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '04' || '.jpg'"
-        rename_5 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '05' || '.jpg'"
-        rename_6 = "'DCIM/" + layer_name + "/' || sample_name || '_' || sample_id || '_' || '06' || '.jpg'"
+        rename_1 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_01.jpg'"
+        rename_2 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_02.jpg'"
+        rename_3 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_03.jpg'"
+        rename_4 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_04.jpg'"
+        rename_5 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_05.jpg'"
+        rename_6 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_06.jpg'"
         custom_property_values = {
             "picture_panel": rename_1,
             "picture_general": rename_2,
@@ -330,6 +365,72 @@ class GpkgCreator:
         }
         custom_property_json = json.dumps(custom_property_values)
         layer.setCustomProperty(custom_property_key, custom_property_json)
+
+        #Clean the form layout tab
+        config = layer.editFormConfig()
+        config.setLayout(1)
+        layer.setEditFormConfig(config)
+        root = config.invisibleRootContainer()
+        root.clear()
+
+        #Create sample metadata tab
+        sample_metadata = QgsAttributeEditorContainer("sample metadata", root)
+
+        #Define the fields
+        sample_name = QgsAttributeEditorField("sample_name", 1, sample_metadata)
+        no_name_on_list = QgsAttributeEditorField("no_name_on_list", 2, sample_metadata)
+        if_no_name_list = QgsAttributeEditorContainer("if_no_name_list", sample_metadata) #create the if_no_name_list tab
+        if_no_expression = QgsOptionalExpression(QgsExpression("no_name_on_list = 1")) #add the visibility expression
+        if_no_name_list.setVisibilityExpression(if_no_expression)
+        name_proposition = QgsAttributeEditorField("name_proposition", 3, if_no_name_list)
+        sample_id = QgsAttributeEditorField("sample_id", 4, sample_metadata)
+        pictures = QgsAttributeEditorContainer("pictures", sample_metadata)
+        pictures_expression = QgsOptionalExpression(QgsExpression('regexp_match(to_string("sample_id"),' + "'dbgi_[0-9]{6}') AND " + '"sample_name" IS NOT NULL AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
+        pictures.setVisibilityExpression(pictures_expression)
+        picture_panel = QgsAttributeEditorField("picture_panel", 5, sample_metadata)
+        picture_general = QgsAttributeEditorField("picture_general", 6, sample_metadata)
+        picture_detail = QgsAttributeEditorField("picture_detail", 7, sample_metadata)
+        picture_cut = QgsAttributeEditorField("picture_cut", 8, sample_metadata)
+        picture_panel_label = QgsAttributeEditorField("picture_panel_label", 9, sample_metadata)
+        picture_free = QgsAttributeEditorField("picture_free", 5, sample_metadata)
+        
+        #Construct the sample metadata tab structure
+        sample_metadata.addChildElement(sample_name)
+        sample_metadata.addChildElement(no_name_on_list)
+        if_no_name_list.addChildElement(name_proposition)
+        sample_metadata.addChildElement(if_no_name_list)
+        sample_metadata.addChildElement(sample_id)
+        pictures.addChildElement(picture_panel)
+        pictures.addChildElement(picture_general)
+        pictures.addChildElement(picture_detail)
+        pictures.addChildElement(picture_cut)
+        pictures.addChildElement(picture_panel_label)
+        pictures.addChildElement(picture_free)
+        sample_metadata.addChildElement(pictures)
+        root.addChildElement(sample_metadata)
+
+        #Create individual metadata tab
+        individual_metadata = QgsAttributeEditorContainer("individual_metadata", root)
+        ipen = QgsAttributeEditorField("ipen", 1, individual_metadata)
+        herbivory = QgsAttributeEditorField("herbivory_(percent)", 2, individual_metadata)
+        comment_eco = QgsAttributeEditorField("comment_eco", 3, individual_metadata)
+        individual_metadata.addChildElement(ipen)
+        individual_metadata.addChildElement(herbivory)
+        individual_metadata.addChildElement(comment_eco)
+        root.addChildElement(individual_metadata)
+
+        #Create environmental metadata tab
+        environmental_metadata = QgsAttributeEditorContainer("environmental metadata", root)
+        soil = QgsAttributeEditorField("soil_type", 1, environmental_metadata)
+        weather = QgsAttributeEditorField("weather", 2, environmental_metadata)
+        temperature = QgsAttributeEditorField("temperature_(°C)", 3, environmental_metadata)
+        comment_env = QgsAttributeEditorField("comment_env", 4, environmental_metadata)
+        environmental_metadata.addChildElement(soil)
+        environmental_metadata.addChildElement(weather)
+        environmental_metadata.addChildElement(temperature)
+        environmental_metadata.addChildElement(comment_env)
+        root.addChildElement(environmental_metadata)
+        layer.setEditFormConfig(config)
 
         #Display label for the points
         label = QgsPalLayerSettings()
