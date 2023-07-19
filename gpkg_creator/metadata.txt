@@ -6,7 +6,7 @@
 name=DBGI
 qgisMinimumVersion=3.0
 description=Creates geopackages that match the requirements for the DBGI project
-version=0.1
+version=0.2
 author=Edouard Brülhart
 email=edouard.bruelhart@unifr.ch
 
@@ -14,6 +14,7 @@ about=This plugin creates geopackages that match the requirements for the DBGI p
     1. The name of your geopackage
     2. The name of a CSV or geopackage file rhat contains the binomial nomenclature of the species you will collect (must be loaded on the project)
     3. The column name containing the binomial nomenclature in the CSV or geopackage file
+    It can also update deprecated geopackes from older plugin versions
 
 tracker=https://github.com/digital-botanical-gardens-initiative/gpkg_creator/issues
 repository=https://github.com/digital-botanical-gardens-initiative/gpkg_creator
@@ -24,6 +25,7 @@ repository=https://github.com/digital-botanical-gardens-initiative/gpkg_creator
 hasProcessingProvider=no
 # Uncomment the following line and add your changelog:
 changelog=0.1 - First release
+          0.2 - Adds some fields and reorganizes new features form. Add a function to update deprecated geopackages
 
 # Tags are comma separated with spaces allowed
 tags=dbgi, geopackage, gpkg
