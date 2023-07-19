@@ -23,7 +23,8 @@
 """
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import *
-from qgis.core import QgsVectorLayer, QgsProject, QgsRelation, QgsEditorWidgetSetup, QgsFieldConstraints, QgsDefaultValue, QgsPalLayerSettings, QgsVectorLayerSimpleLabeling, QgsAttributeEditorContainer, QgsAttributeEditorField, QgsOptionalExpression, QgsExpression
+from qgis.core import QgsVectorLayer, QgsProject, QgsRelation, QgsEditorWidgetSetup, QgsFieldConstraints, QgsDefaultValue, QgsPalLayerSettings, QgsVectorLayerSimpleLabeling, QgsAttributeEditorContainer, QgsAttributeEditorField, QgsOptionalExpression, QgsExpression, QgsField
+from qgis.PyQt.QtCore import QVariant
 from qgis.gui import QgsMapLayerComboBox
 from osgeo import ogr
 import os
@@ -90,6 +91,41 @@ class LayerSelectionDialog(QDialog):
         field_names = [field.name() for field in selected_layer.fields()]
         self.field_combobox.addItems(field_names)
 
+#Creates the selection dialog for binomial nomenclature item
+class LayerSelectionDialog_second(QDialog):
+    def __init__(self, parent=None):
+        super(LayerSelectionDialog_second, self).__init__(parent)
+        self.setWindowTitle("Select the geopackage to modify")
+        self.layout = QVBoxLayout()
+
+        # Create a label for layer selection
+        self.label = QLabel("Select the name of the geopackage:")
+        self.layout.addWidget(self.label)
+
+        # Create a layer combobox
+        self.layer_combobox = QgsMapLayerComboBox()
+        self.layout.addWidget(self.layer_combobox)
+
+        # Create a button to confirm the selection
+        self.button_ok = QPushButton("OK")
+        self.button_ok.clicked.connect(self.accept)
+        self.layout.addWidget(self.button_ok)
+
+        self.setLayout(self.layout)
+
+        # Connect the signal to update field combobox when layer selection changes
+        self.layer_combobox.currentIndexChanged.connect(self.updateLayerComboBox)
+
+    #Gives the selected binomial nomenclature item
+    def selectedLayer(self):
+        return self.layer_combobox.currentLayer()
+    
+    def updateLayerComboBox(self):
+        # Get the selected layer
+        selected_layer = self.selectedLayer()
+        if not selected_layer:
+            return
+
 class GpkgCreator:
     def __init__(self, iface):
         self.iface = iface
@@ -99,15 +135,21 @@ class GpkgCreator:
         self.action = QAction(
                           "Create a DBGI geopackage",
                           self.iface.mainWindow())
-        
         self.action.triggered.connect(self.run)
+
+        self.second_action = QAction(
+                            "Modify an existing DBGI geopackage",
+                            self.iface.mainWindow())
+        self.second_action.triggered.connect(self.run_second)
 
         # add toolbar button
         self.iface.addPluginToVectorMenu("&DBGI", self.action)
+        self.iface.addPluginToVectorMenu("&DBGI", self.second_action)
 
     def unload(self):
         # remove the toolbar button
         self.iface.removePluginVectorMenu("&DBGI", self.action)
+        self.iface.removePluginVectorMenu("&DBGI", self.second_action)
 
     def run(self):
         # Ask user to enter the name of the GPKG and name of the plant list
@@ -444,3 +486,192 @@ class GpkgCreator:
         root = QgsProject.instance().layerTreeRoot()
         layer_node = root.findLayer(imp_layer.id())
         layer_node.setCustomProperty("showFeatureCount", 1)
+
+    def run_second(self):
+        # Create the dialog to select a layer
+        dialog = LayerSelectionDialog_second()
+        if dialog.exec_() != QDialog.Accepted:
+            return
+
+        # Get the selected layer from the dialog
+        selected_layer = dialog.selectedLayer()
+        if not selected_layer:
+            return
+        
+        layer = selected_layer
+        layer_name = selected_layer.name()
+        layer_id = selected_layer.id()
+
+        field_def1 = QgsField("no_name_on_list", QVariant.Int)
+        layer.dataProvider().addAttributes([field_def1])
+
+        field_def2 = QgsField("name_proposition", QVariant.String)
+        layer.dataProvider().addAttributes([field_def2])
+
+        field_def3 = QgsField("picture_free", QVariant.String)
+        layer.dataProvider().addAttributes([field_def3])
+
+        #Creation of the individual metadata fields
+        field_def4 = QgsField("ipen", QVariant.String)
+        selected_layer.dataProvider().addAttributes([field_def4])
+
+        field_def5 = QgsField("herbivory_(percent)", QVariant.Int)
+        layer.dataProvider().addAttributes([field_def5])
+
+        field_def6 = QgsField("comment_eco", QVariant.String)
+        layer.dataProvider().addAttributes([field_def6])
+
+        #Creation of the environmental metadata fields
+        
+        field_def7 = QgsField("soil_type", QVariant.String)
+        selected_layer.dataProvider().addAttributes([field_def7])
+
+        field_def8 = QgsField("weather", QVariant.String)
+        layer.dataProvider().addAttributes([field_def8])
+
+        field_def9 = QgsField("temperature_(°C)", QVariant.Double)
+        layer.dataProvider().addAttributes([field_def9])
+
+        field_def10 = QgsField("comment_env", QVariant.String)
+        layer.dataProvider().addAttributes([field_def10])
+
+        layer.updateFields()
+    
+        #layer = QgsProject.instance().mapLayer(layer_id)
+
+        #Define different widget types
+        attach = QgsEditorWidgetSetup('ExternalResource', {}) #Defines attachment widget type
+        checkbox = QgsEditorWidgetSetup('CheckBox', {'CheckedState': 1, 'UncheckedState': 0})
+        range = QgsEditorWidgetSetup('Range', {
+            'AllowNull': True,
+            'Max': 100,
+            'Min': 0,
+            'Step': 1,
+            'Style': 'Slider'
+        }
+        )
+        form_soil = QgsEditorWidgetSetup('ValueMap', 
+                                         {'map': {
+                                             "sandy soil": "sandy soil",
+                                             "loamy soil": "loamy soil",
+                                             "clay soil": "clay soil",
+                                             "humus soil": "humus soil"
+                                             }
+                                             }
+                                             )
+        
+        form_weather = QgsEditorWidgetSetup('ValueMap',
+                                         {'map': {
+                                             "sunny": "sunny",
+                                             "cloudy": "cloudy",
+                                             "rainy": "rainy",
+                                             "snowy": "snowy",
+                                             "foggy": "foggy"
+                                             }
+                                             }
+                                             )
+
+        #no_name_on_list field properties
+        layer.setEditorWidgetSetup(10, checkbox)
+        layer.setDefaultValueDefinition(10, QgsDefaultValue('0'))
+
+        #name_proposition field properties
+        expr_constr_name = 'CASE WHEN "no_name_on_list" = 0 THEN "name_proposition" IS NULL ELSE "name_proposition" IS NOT NULL END'
+        layer.setConstraintExpression(11, expr_constr_name)
+
+        #picture_free field properties
+        layer.setEditorWidgetSetup(12, attach)
+        
+        #herbivory_(percent) field properties
+        layer.setEditorWidgetSetup(14, range)
+
+        #soil_type field properties
+        layer.setEditorWidgetSetup(16, form_soil)
+
+        #weather field properties
+        layer.setEditorWidgetSetup(17, form_weather)
+
+        #Change picture naming for the five concerned fields for QField
+        custom_property_key = "QFieldSync/attachment_naming"
+        rename_1 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_01.jpg'"
+        rename_2 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_02.jpg'"
+        rename_3 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_03.jpg'"
+        rename_4 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_04.jpg'"
+        rename_5 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_05.jpg'"
+        rename_6 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "sample_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_06.jpg'"
+        custom_property_values = {
+            "picture_panel": rename_1,
+            "picture_general": rename_2,
+            "picture_detail": rename_3,
+            "picture_cut": rename_4,
+            "picture_panel_label": rename_5,
+            "picture_free": rename_6
+        }
+        custom_property_json = json.dumps(custom_property_values)
+        layer.setCustomProperty(custom_property_key, custom_property_json)
+
+        #Clean the form layout tab
+        config = layer.editFormConfig()
+        config.setLayout(1)
+        layer.setEditFormConfig(config)
+        root = config.invisibleRootContainer()
+        root.clear()
+
+        #Create sample metadata tab
+        sample_metadata = QgsAttributeEditorContainer("sample metadata", root)
+
+        #Define the fields
+        sample_name = QgsAttributeEditorField("sample_name", 1, sample_metadata)
+        no_name_on_list = QgsAttributeEditorField("no_name_on_list", 2, sample_metadata)
+        if_no_name_list = QgsAttributeEditorContainer("if_no_name_list", sample_metadata) #create the if_no_name_list tab
+        if_no_expression = QgsOptionalExpression(QgsExpression("no_name_on_list = 1")) #add the visibility expression
+        if_no_name_list.setVisibilityExpression(if_no_expression)
+        name_proposition = QgsAttributeEditorField("name_proposition", 3, if_no_name_list)
+        sample_id = QgsAttributeEditorField("sample_id", 4, sample_metadata)
+        pictures = QgsAttributeEditorContainer("pictures", sample_metadata)
+        pictures_expression = QgsOptionalExpression(QgsExpression('regexp_match(to_string("sample_id"),' + "'dbgi_[0-9]{6}') AND " + '"sample_name" IS NOT NULL AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
+        pictures.setVisibilityExpression(pictures_expression)
+        picture_panel = QgsAttributeEditorField("picture_panel", 5, sample_metadata)
+        picture_general = QgsAttributeEditorField("picture_general", 6, sample_metadata)
+        picture_detail = QgsAttributeEditorField("picture_detail", 7, sample_metadata)
+        picture_cut = QgsAttributeEditorField("picture_cut", 8, sample_metadata)
+        picture_panel_label = QgsAttributeEditorField("picture_panel_label", 9, sample_metadata)
+        picture_free = QgsAttributeEditorField("picture_free", 5, sample_metadata)
+        
+        #Construct the sample metadata tab structure
+        sample_metadata.addChildElement(sample_name)
+        sample_metadata.addChildElement(no_name_on_list)
+        if_no_name_list.addChildElement(name_proposition)
+        sample_metadata.addChildElement(if_no_name_list)
+        sample_metadata.addChildElement(sample_id)
+        pictures.addChildElement(picture_panel)
+        pictures.addChildElement(picture_general)
+        pictures.addChildElement(picture_detail)
+        pictures.addChildElement(picture_cut)
+        pictures.addChildElement(picture_panel_label)
+        pictures.addChildElement(picture_free)
+        sample_metadata.addChildElement(pictures)
+        root.addChildElement(sample_metadata)
+
+        #Create individual metadata tab
+        individual_metadata = QgsAttributeEditorContainer("individual_metadata", root)
+        ipen = QgsAttributeEditorField("ipen", 1, individual_metadata)
+        herbivory = QgsAttributeEditorField("herbivory_(percent)", 2, individual_metadata)
+        comment_eco = QgsAttributeEditorField("comment_eco", 3, individual_metadata)
+        individual_metadata.addChildElement(ipen)
+        individual_metadata.addChildElement(herbivory)
+        individual_metadata.addChildElement(comment_eco)
+        root.addChildElement(individual_metadata)
+
+        #Create environmental metadata tab
+        environmental_metadata = QgsAttributeEditorContainer("environmental metadata", root)
+        soil = QgsAttributeEditorField("soil_type", 1, environmental_metadata)
+        weather = QgsAttributeEditorField("weather", 2, environmental_metadata)
+        temperature = QgsAttributeEditorField("temperature_(°C)", 3, environmental_metadata)
+        comment_env = QgsAttributeEditorField("comment_env", 4, environmental_metadata)
+        environmental_metadata.addChildElement(soil)
+        environmental_metadata.addChildElement(weather)
+        environmental_metadata.addChildElement(temperature)
+        environmental_metadata.addChildElement(comment_env)
+        root.addChildElement(environmental_metadata)
+        layer.setEditFormConfig(config)
