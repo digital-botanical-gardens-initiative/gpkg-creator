@@ -3,10 +3,10 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=DBGI
+name=EMI
 qgisMinimumVersion=3.0
 description=Creates geopackages that match the requirements for the DBGI project
-version=0.2
+version=0.3
 author=Edouard Brülhart
 email=edouard.bruelhart@unifr.ch
 
@@ -26,6 +26,7 @@ hasProcessingProvider=no
 # Uncomment the following line and add your changelog:
 changelog=0.1 - First release
           0.2 - Adds some fields and reorganizes new features form. Add a function to update deprecated geopackages
+          0.3 - Makes the plugin compatible with other projects than DBGI
 
 # Tags are comma separated with spaces allowed
 tags=dbgi, geopackage, gpkg
