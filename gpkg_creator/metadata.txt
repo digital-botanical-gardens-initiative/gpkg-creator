@@ -5,7 +5,7 @@
 [general]
 name=EMI
 qgisMinimumVersion=3.0
-description=Creates geopackages that match the requirements for the DBGI project
+description=Creates geopackages that match the requirements for the EMI project
 version=0.3
 author=Edouard Brülhart
 email=edouard.bruelhart@unifr.ch
@@ -29,7 +29,7 @@ changelog=0.1 - First release
           0.3 - Makes the plugin compatible with other projects than DBGI
 
 # Tags are comma separated with spaces allowed
-tags=dbgi, geopackage, gpkg
+tags=dbgi, geopackage, gpkg, emi
 
 homepage=https://www.dbgi.org/dendron-dbgi/notes/1u37mlza55e6dgksabcv7qn/
 category=Vector

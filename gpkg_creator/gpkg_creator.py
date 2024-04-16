@@ -22,23 +22,28 @@
  ***************************************************************************/
 """
 from qgis.PyQt.QtGui import *
-from qgis.PyQt.QtWidgets import *
+from qgis.PyQt.QtWidgets import QComboBox, QDialog, QAction, QMessageBox, QInputDialog, QVBoxLayout, QLabel, QPushButton
 from qgis.core import QgsVectorLayer, QgsProject, QgsRelation, QgsEditorWidgetSetup, QgsFieldConstraints, QgsDefaultValue, QgsPalLayerSettings, QgsVectorLayerSimpleLabeling, QgsAttributeEditorContainer, QgsAttributeEditorField, QgsOptionalExpression, QgsExpression, QgsField
 from qgis.PyQt.QtCore import QVariant
 from qgis.gui import QgsMapLayerComboBox
 from osgeo import ogr
 import os
 import json
+import requests
 
 def classFactory(iface):
     return GpkgCreator(iface)
 
-#Creates the selection dialog for binomial nomenclature item
-class LayerSelectionDialog(QDialog):
-    def __init__(self, gpkg_name, parent=None):
-        super(LayerSelectionDialog, self).__init__(parent)
+#Creates a DBGI layer
+class LayerSelectionDialog_create(QDialog):
+    def __init__(self, project_name, gpkg_name, parent=None):
+        super(LayerSelectionDialog_create, self).__init__(parent)
         self.setWindowTitle("Select identification's layer")
         self.layout = QVBoxLayout()
+
+        # Ask the project name
+        self.project_label = QLabel(f"Project name: {project_name}")
+        self.layout.addWidget(self.project_label)
 
         # Create a label for GPKG name
         self.gpkg_label = QLabel(f"GPKG name: {gpkg_name}")
@@ -91,10 +96,10 @@ class LayerSelectionDialog(QDialog):
         field_names = [field.name() for field in selected_layer.fields()]
         self.field_combobox.addItems(field_names)
 
-#Creates the selection dialog for binomial nomenclature item
-class LayerSelectionDialog_second(QDialog):
+#Modify an already existing layer
+class LayerSelectionDialog_modify(QDialog):
     def __init__(self, parent=None):
-        super(LayerSelectionDialog_second, self).__init__(parent)
+        super(LayerSelectionDialog_modify, self).__init__(parent)
         self.setWindowTitle("Select the geopackage to modify")
         self.layout = QVBoxLayout()
 
@@ -125,6 +130,68 @@ class LayerSelectionDialog_second(QDialog):
         selected_layer = self.selectedLayer()
         if not selected_layer:
             return
+        
+#Creates the selection dialog for observation only field
+class LayerSelectionDialog_create_obs(QDialog):
+    def __init__(self, project_name, gpkg_name, parent=None):
+        super(LayerSelectionDialog_create_obs, self).__init__(parent)
+        self.setWindowTitle("Select identification's layer")
+        self.layout = QVBoxLayout()
+
+        # Ask the project name
+        self.project_label = QLabel(f"Project name: {project_name}")
+        self.layout.addWidget(self.project_label)
+
+        # Create a label for GPKG name
+        self.gpkg_label = QLabel(f"GPKG name: {gpkg_name}")
+        self.layout.addWidget(self.gpkg_label)
+
+        # Create a label for layer selection
+        self.label = QLabel("Select identification's layer:")
+        self.layout.addWidget(self.label)
+
+        # Create a layer combobox
+        self.layer_combobox = QgsMapLayerComboBox()
+        self.layout.addWidget(self.layer_combobox)
+
+        # Create a label for field selection
+        self.field_label = QLabel("Select identification's name column in the identification's layer:")
+        self.layout.addWidget(self.field_label)
+
+        # Create a field combobox
+        self.field_combobox = QComboBox()
+        self.layout.addWidget(self.field_combobox)
+
+        # Create a button to confirm the selection
+        self.button_ok = QPushButton("OK")
+        self.button_ok.clicked.connect(self.accept)
+        self.layout.addWidget(self.button_ok)
+
+        self.setLayout(self.layout)
+
+        # Connect the signal to update field combobox when layer selection changes
+        self.layer_combobox.currentIndexChanged.connect(self.updateFieldComboBox)
+
+    #Gives the selected binomial nomenclature item
+    def selectedLayer(self):
+        return self.layer_combobox.currentLayer()
+    
+    #Gives the selected binomial nomenclature item's field
+    def selectedField(self):
+        return self.field_combobox.currentText()
+    
+    def updateFieldComboBox(self):
+        # Clear the field combobox
+        self.field_combobox.clear()
+
+        # Get the selected layer
+        selected_layer = self.selectedLayer()
+        if not selected_layer:
+            return
+        
+        # Get the field names from the selected layer
+        field_names = [field.name() for field in selected_layer.fields()]
+        self.field_combobox.addItems(field_names)
 
 class GpkgCreator:
     def __init__(self, iface):
@@ -132,33 +199,61 @@ class GpkgCreator:
 
     def initGui(self):
         # create action that will start plugin configuration
-        self.action = QAction(
-                          "Create a DBGI geopackage",
+        self.create_action = QAction(
+                          "Create an EMI geopackage",
                           self.iface.mainWindow())
-        self.action.triggered.connect(self.run)
+        self.create_action.triggered.connect(self.run_create)
 
-        self.second_action = QAction(
-                            "Modify an existing DBGI geopackage",
+        self.modify_action = QAction(
+                            "Modify an existing EMI geopackage",
                             self.iface.mainWindow())
-        self.second_action.triggered.connect(self.run_second)
+        self.modify_action.triggered.connect(self.run_modify)
+
+        self.create_obs_action = QAction(
+                            "Create an observation EMI geopackage",
+                            self.iface.mainWindow())
+        self.create_obs_action.triggered.connect(self.run_create_obs)
 
         # add toolbar button
-        self.iface.addPluginToVectorMenu("&DBGI", self.action)
-        self.iface.addPluginToVectorMenu("&DBGI", self.second_action)
+        self.iface.addPluginToVectorMenu("&EMI", self.create_action)
+        self.iface.addPluginToVectorMenu("&EMI", self.modify_action)
+        self.iface.addPluginToVectorMenu("&EMI", self.create_obs_action)
 
     def unload(self):
         # remove the toolbar button
-        self.iface.removePluginVectorMenu("&DBGI", self.action)
-        self.iface.removePluginVectorMenu("&DBGI", self.second_action)
+        self.iface.removePluginVectorMenu("&EMI", self.create_action)
+        self.iface.removePluginVectorMenu("&EMI", self.modify_action)
+        self.iface.removePluginVectorMenu("&EMI", self.create_obs_action)
 
-    def run(self):
+    def run_create(self):
+        #Extract the project names from directus
+        collection_url = "http://directus.dbgi.org/items/EMI_codes"
+        column = 'emi_code'
+        params = {'sort[]': f'{column}'}
+        session = requests.Session()
+        response = session.get(collection_url, params=params)
+        data = response.json()['data']
+        project_names = [item[column] for item in data]
+        combo_box = QComboBox()
+        combo_box.addItems(project_names)
+        # Ask user to select a project name from the combo box
+        combo_box_prompt = QMessageBox()
+        combo_box_prompt.setWindowTitle("Select Project")
+        combo_box_prompt.setText("Please select a project:")
+        combo_box_prompt.addButton(QMessageBox.Ok)
+        combo_box_prompt.layout().addWidget(combo_box)
+        combo_box_prompt.exec_()
+        # Get the selected project name
+        if combo_box_prompt.clickedButton():
+            project_name = combo_box.currentText()
+
         # Ask user to enter the name of the GPKG and name of the plant list
         gpkg_name, ok = QInputDialog.getText(self.iface.mainWindow(), "GPKG name", "Enter the name of the GPKG:")
         if not ok or gpkg_name == "":
             return
 
         # Create the dialog to select a layer
-        dialog = LayerSelectionDialog(gpkg_name)
+        dialog = LayerSelectionDialog_create(project_name, gpkg_name)
         if dialog.exec_() != QDialog.Accepted:
             return
 
@@ -198,7 +293,6 @@ class GpkgCreator:
         layer.CreateField(field_def1)
 
         field_def2 = ogr.FieldDefn("no_name_on_list", ogr.OFTInteger)
-        #field_def2.SetWidth(200)
         layer.CreateField(field_def2)
 
         field_def3 = ogr.FieldDefn("name_proposition", ogr.OFTString)
@@ -336,7 +430,7 @@ class GpkgCreator:
         layer.setConstraintExpression(3, expr_constr_name)
 
         #sample_id field properties
-        expr_constr = 'regexp_match(to_string("sample_id"), \'dbgi_[0-9]{6}\')'
+        expr_constr = f'regexp_match(to_string("sample_id"), \'{project_name}_[0-9]{{6}}\')'
         layer.setFieldConstraint(4, QgsFieldConstraints.ConstraintNotNull)
         layer.setFieldConstraint(4, QgsFieldConstraints.ConstraintUnique)
         layer.setConstraintExpression(4, expr_constr)
@@ -427,14 +521,14 @@ class GpkgCreator:
         name_proposition = QgsAttributeEditorField("name_proposition", 3, if_no_name_list)
         sample_id = QgsAttributeEditorField("sample_id", 4, sample_metadata)
         pictures = QgsAttributeEditorContainer("pictures", sample_metadata)
-        pictures_expression = QgsOptionalExpression(QgsExpression('regexp_match(to_string("sample_id"),' + "'dbgi_[0-9]{6}') AND " + '"sample_name" IS NOT NULL AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
+        pictures_expression = QgsOptionalExpression(QgsExpression('regexp_match(to_string("sample_id"),' + f"'{project_name}_[0-9]{{6}}') AND " + '"sample_name" IS NOT NULL AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
         pictures.setVisibilityExpression(pictures_expression)
-        picture_panel = QgsAttributeEditorField("picture_panel", 5, sample_metadata)
-        picture_general = QgsAttributeEditorField("picture_general", 6, sample_metadata)
-        picture_detail = QgsAttributeEditorField("picture_detail", 7, sample_metadata)
-        picture_cut = QgsAttributeEditorField("picture_cut", 8, sample_metadata)
-        picture_panel_label = QgsAttributeEditorField("picture_panel_label", 9, sample_metadata)
-        picture_free = QgsAttributeEditorField("picture_free", 5, sample_metadata)
+        picture_general = QgsAttributeEditorField("picture_general", 5, sample_metadata)
+        picture_panel = QgsAttributeEditorField("picture_panel", 6, sample_metadata)
+        picture_panel_label = QgsAttributeEditorField("picture_panel_label", 7, sample_metadata)
+        picture_detail = QgsAttributeEditorField("picture_detail", 8, sample_metadata)
+        picture_cut = QgsAttributeEditorField("picture_cut", 9, sample_metadata)
+        picture_free = QgsAttributeEditorField("picture_free", 10, sample_metadata)
         
         #Construct the sample metadata tab structure
         sample_metadata.addChildElement(sample_name)
@@ -442,11 +536,11 @@ class GpkgCreator:
         if_no_name_list.addChildElement(name_proposition)
         sample_metadata.addChildElement(if_no_name_list)
         sample_metadata.addChildElement(sample_id)
-        pictures.addChildElement(picture_panel)
         pictures.addChildElement(picture_general)
+        pictures.addChildElement(picture_panel)
+        pictures.addChildElement(picture_panel_label)
         pictures.addChildElement(picture_detail)
         pictures.addChildElement(picture_cut)
-        pictures.addChildElement(picture_panel_label)
         pictures.addChildElement(picture_free)
         sample_metadata.addChildElement(pictures)
         root.addChildElement(sample_metadata)
@@ -487,9 +581,30 @@ class GpkgCreator:
         layer_node = root.findLayer(imp_layer.id())
         layer_node.setCustomProperty("showFeatureCount", 1)
 
-    def run_second(self):
+    def run_modify(self):
+        #Extract the project names from directus
+        collection_url = "http://directus.dbgi.org/items/EMI_codes"
+        column = 'emi_code'
+        params = {'sort[]': f'{column}'}
+        session = requests.Session()
+        response = session.get(collection_url, params=params)
+        data = response.json()['data']
+        project_names = [item[column] for item in data]
+        combo_box = QComboBox()
+        combo_box.addItems(project_names)
+        # Ask user to select a project name from the combo box
+        combo_box_prompt = QMessageBox()
+        combo_box_prompt.setWindowTitle("Select Project")
+        combo_box_prompt.setText("Please select a project:")
+        combo_box_prompt.addButton(QMessageBox.Ok)
+        combo_box_prompt.layout().addWidget(combo_box)
+        combo_box_prompt.exec_()
+        # Get the selected project name
+        if combo_box_prompt.clickedButton():
+            project_name = combo_box.currentText()
+
         # Create the dialog to select a layer
-        dialog = LayerSelectionDialog_second()
+        dialog = LayerSelectionDialog_modify()
         if dialog.exec_() != QDialog.Accepted:
             return
 
@@ -500,7 +615,6 @@ class GpkgCreator:
         
         layer = selected_layer
         layer_name = selected_layer.name()
-        layer_id = selected_layer.id()
 
         field_def1 = QgsField("no_name_on_list", QVariant.Int)
         layer.dataProvider().addAttributes([field_def1])
@@ -629,14 +743,14 @@ class GpkgCreator:
         name_proposition = QgsAttributeEditorField("name_proposition", 3, if_no_name_list)
         sample_id = QgsAttributeEditorField("sample_id", 4, sample_metadata)
         pictures = QgsAttributeEditorContainer("pictures", sample_metadata)
-        pictures_expression = QgsOptionalExpression(QgsExpression('regexp_match(to_string("sample_id"),' + "'dbgi_[0-9]{6}') AND " + '"sample_name" IS NOT NULL AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
+        pictures_expression = QgsOptionalExpression(QgsExpression('regexp_match(to_string("sample_id"),' + f"'{project_name}_[0-9]{{6}}') AND " + '"sample_name" IS NOT NULL AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
         pictures.setVisibilityExpression(pictures_expression)
-        picture_panel = QgsAttributeEditorField("picture_panel", 5, sample_metadata)
-        picture_general = QgsAttributeEditorField("picture_general", 6, sample_metadata)
-        picture_detail = QgsAttributeEditorField("picture_detail", 7, sample_metadata)
-        picture_cut = QgsAttributeEditorField("picture_cut", 8, sample_metadata)
-        picture_panel_label = QgsAttributeEditorField("picture_panel_label", 9, sample_metadata)
-        picture_free = QgsAttributeEditorField("picture_free", 5, sample_metadata)
+        picture_general = QgsAttributeEditorField("picture_general", 5, sample_metadata)
+        picture_panel = QgsAttributeEditorField("picture_panel", 6, sample_metadata)
+        picture_panel_label = QgsAttributeEditorField("picture_panel_label", 7, sample_metadata)
+        picture_detail = QgsAttributeEditorField("picture_detail", 8, sample_metadata)
+        picture_cut = QgsAttributeEditorField("picture_cut", 9, sample_metadata)
+        picture_free = QgsAttributeEditorField("picture_free", 10, sample_metadata)
         
         #Construct the sample metadata tab structure
         sample_metadata.addChildElement(sample_name)
@@ -644,11 +758,11 @@ class GpkgCreator:
         if_no_name_list.addChildElement(name_proposition)
         sample_metadata.addChildElement(if_no_name_list)
         sample_metadata.addChildElement(sample_id)
-        pictures.addChildElement(picture_panel)
         pictures.addChildElement(picture_general)
+        pictures.addChildElement(picture_panel)
+        pictures.addChildElement(picture_panel_label)
         pictures.addChildElement(picture_detail)
         pictures.addChildElement(picture_cut)
-        pictures.addChildElement(picture_panel_label)
         pictures.addChildElement(picture_free)
         sample_metadata.addChildElement(pictures)
         root.addChildElement(sample_metadata)
@@ -675,3 +789,323 @@ class GpkgCreator:
         environmental_metadata.addChildElement(comment_env)
         root.addChildElement(environmental_metadata)
         layer.setEditFormConfig(config)
+
+    def run_create_obs(self):
+        #Extract the project names from directus
+        collection_url = "http://directus.dbgi.org/items/EMI_codes"
+        column = 'emi_code'
+        params = {'sort[]': f'{column}'}
+        session = requests.Session()
+        response = session.get(collection_url, params=params)
+        data = response.json()['data']
+        project_names = [item[column] for item in data]
+        combo_box = QComboBox()
+        combo_box.addItems(project_names)
+        # Ask user to select a project name from the combo box
+        combo_box_prompt = QMessageBox()
+        combo_box_prompt.setWindowTitle("Select Project")
+        combo_box_prompt.setText("Please select a project:")
+        combo_box_prompt.addButton(QMessageBox.Ok)
+        combo_box_prompt.layout().addWidget(combo_box)
+        combo_box_prompt.exec_()
+        # Get the selected project name
+        if combo_box_prompt.clickedButton():
+            project_name = combo_box.currentText()
+
+        # Ask user to enter the name of the GPKG and name of the plant list
+        gpkg_name, ok = QInputDialog.getText(self.iface.mainWindow(), "GPKG name", "Enter the name of the GPKG:")
+        if not ok or gpkg_name == "":
+            return
+
+        # Create the dialog to select a layer
+        dialog = LayerSelectionDialog_create_obs(project_name, gpkg_name)
+        if dialog.exec_() != QDialog.Accepted:
+            return
+
+        # Get the selected layer from the dialog
+        selected_layer = dialog.selectedLayer()
+        selected_field = dialog.selectedField()
+        if not selected_layer or not selected_field:
+            return
+
+        # Retrieve layer information
+        plant_layer_id = selected_layer.id()
+        
+        # Stores the project's folder
+        project_folder = QgsProject.instance().readPath("./")
+        # Creates the gpkg's path
+        gpkg_file = os.path.join(project_folder, gpkg_name + '_obs' '.gpkg')
+        gpkg_file = gpkg_file.replace("\\", "/")
+        # Define the type gpkg for the layer
+        driver = ogr.GetDriverByName('GPKG')
+        # Creates the gpkg
+        ds = driver.CreateDataSource(gpkg_file)
+        # Sets the layer name (same as gpkg's name)
+        layer_name = gpkg_name + '_obs'
+        #sets the layer's srs
+        project_crs = QgsProject.instance().crs()
+        crs_wkt = project_crs.toWkt()
+        srs = ogr.osr.SpatialReference()
+        srs.ImportFromWkt(crs_wkt)
+        #Sets the layer geometry type (here point)
+        geom_type = ogr.wkbPoint
+        #Creates the layer
+        layer = ds.CreateLayer(layer_name, srs, geom_type)
+
+        #Creation of the sample metadata fields
+        field_def1 = ogr.FieldDefn("observation_name", ogr.OFTString)
+        field_def1.SetWidth(200)
+        layer.CreateField(field_def1)
+
+        field_def2 = ogr.FieldDefn("no_name_on_list", ogr.OFTInteger)
+        layer.CreateField(field_def2)
+
+        field_def3 = ogr.FieldDefn("name_proposition", ogr.OFTString)
+        field_def3.SetWidth(200)
+        layer.CreateField(field_def3)
+
+        field_def4 = ogr.FieldDefn("picture_panel", ogr.OFTString)
+        field_def4.SetWidth(200)
+        layer.CreateField(field_def4)
+
+        field_def5 = ogr.FieldDefn("picture_general", ogr.OFTString)
+        field_def5.SetWidth(200)
+        layer.CreateField(field_def5)
+
+        field_def6 = ogr.FieldDefn("picture_detail", ogr.OFTString)
+        field_def6.SetWidth(200)
+        layer.CreateField(field_def6)
+        
+        field_def7 = ogr.FieldDefn("picture_free", ogr.OFTString)
+        field_def7.SetWidth(200)
+        layer.CreateField(field_def7)
+
+        field_def8 = ogr.FieldDefn("x_coord", ogr.OFTReal)
+        field_def8.SetPrecision(0)
+        layer.CreateField(field_def8)
+
+        field_def9 = ogr.FieldDefn("y_coord", ogr.OFTReal)
+        field_def9.SetPrecision(0)
+        layer.CreateField(field_def9)
+
+        #Creation of the individual metadata fields
+        field_def10 = ogr.FieldDefn("ipen", ogr.OFTString)
+        field_def10.SetWidth(200)
+        layer.CreateField(field_def10)
+
+        field_def11 = ogr.FieldDefn("herbivory_(percent)", ogr.OFTInteger)
+        #field_def11.SetWidth(200)
+        layer.CreateField(field_def11)
+
+        field_def12 = ogr.FieldDefn("comment_eco", ogr.OFTString)
+        field_def12.SetWidth(1000)
+        layer.CreateField(field_def12)
+
+        #Creation of the environmental metadata fields
+        field_def13 = ogr.FieldDefn("soil_type", ogr.OFTString)
+        field_def13.SetWidth(200)
+        layer.CreateField(field_def13)
+
+        field_def14 = ogr.FieldDefn("weather", ogr.OFTString)
+        field_def14.SetWidth(200)
+        layer.CreateField(field_def14)
+
+        field_def15 = ogr.FieldDefn("temperature_(°C)", ogr.OFTReal)
+        field_def15.SetPrecision(0)
+        layer.CreateField(field_def15)
+
+        field_def16 = ogr.FieldDefn("comment_env", ogr.OFTString)
+        field_def16.SetWidth(1000)
+        layer.CreateField(field_def16)
+
+        #Close the GeoPackage file
+        ds = None
+
+        # Load the GeoPackage file as a vector layer in QGIS
+        imp_layer = QgsVectorLayer(gpkg_file + "|layername=" + layer_name, layer_name, "ogr")
+        QgsProject.instance().addMapLayer(imp_layer)
+       
+        #Create association relation between binomial nomenclature layer and sample_name field
+        imp_layer_id = imp_layer.id()
+        imp_layer_field = "observation_name"
+        relation = QgsRelation()
+        relation.setReferencingLayer(imp_layer_id)
+        relation.setReferencedLayer(plant_layer_id)
+        relation.addFieldPair(imp_layer_field, selected_field)
+        relation.setId(layer_name)
+        relation.setName(layer_name)
+        QgsProject.instance().relationManager().addRelation(relation)
+
+        #Define the layer to change field properties
+        layer = QgsProject.instance().mapLayer(imp_layer_id)
+
+        #Define different widget types
+        attach = QgsEditorWidgetSetup('ExternalResource', {}) #Defines attachment widget type
+        checkbox = QgsEditorWidgetSetup('CheckBox', {'CheckedState': 1, 'UncheckedState': 0})
+        range = QgsEditorWidgetSetup('Range', {
+            'AllowNull': True,
+            'Max': 100,
+            'Min': 0,
+            'Step': 1,
+            'Style': 'Slider'
+        }
+        )
+        form_soil = QgsEditorWidgetSetup('ValueMap', 
+                                         {'map': {
+                                             "sandy soil": "sandy soil",
+                                             "loamy soil": "loamy soil",
+                                             "clay soil": "clay soil",
+                                             "humus soil": "humus soil"
+                                             }
+                                             }
+                                             )
+        
+        form_weather = QgsEditorWidgetSetup('ValueMap',
+                                         {'map': {
+                                             "sunny": "sunny",
+                                             "cloudy": "cloudy",
+                                             "rainy": "rainy",
+                                             "snowy": "snowy",
+                                             "foggy": "foggy"
+                                             }
+                                             }
+                                             )
+
+        #observation_name field properties
+        layer.setFieldConstraint(1, QgsFieldConstraints.ConstraintNotNull)
+
+        #no_name_on_list field properties
+        layer.setEditorWidgetSetup(2, checkbox)
+        layer.setDefaultValueDefinition(2, QgsDefaultValue('0'))
+
+        #name_proposition field properties
+        expr_constr_name = 'CASE WHEN "no_name_on_list" = 0 THEN "name_proposition" IS NULL ELSE "name_proposition" IS NOT NULL END'
+        layer.setConstraintExpression(3, expr_constr_name)
+
+        #picture_panel field properties
+        layer.setFieldConstraint(4, QgsFieldConstraints.ConstraintNotNull)
+        layer.setEditorWidgetSetup(4, attach)
+
+        #picture_general field properties
+        layer.setFieldConstraint(5, QgsFieldConstraints.ConstraintNotNull)
+        layer.setEditorWidgetSetup(5, attach)
+
+        #picture_detail field properties
+        layer.setFieldConstraint(6, QgsFieldConstraints.ConstraintNotNull)
+        layer.setEditorWidgetSetup(6, attach)
+
+        #picture_free field properties
+        layer.setEditorWidgetSetup(7, attach)
+
+        #x_coord field properties
+        coord_x = QgsDefaultValue("$x")
+        layer.setDefaultValueDefinition(8, coord_x)
+
+        #y_coord field properties
+        coord_y = QgsDefaultValue("$y")
+        layer.setDefaultValueDefinition(9, coord_y)
+
+        #ipen field properties
+        
+        #herbivory_(percent) field properties
+        layer.setEditorWidgetSetup(11, range)
+
+        #comment_eco field properties
+
+        #soil_type field properties
+        layer.setEditorWidgetSetup(13, form_soil)
+
+        #weather field properties
+        layer.setEditorWidgetSetup(14, form_weather)
+
+        #temperature_(°C) field properties
+
+        #comment_env field properties
+
+        #Change picture naming for the five concerned fields for QField
+        custom_property_key = "QFieldSync/attachment_naming"
+        rename_1 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "observation_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_obs_01.jpg'"
+        rename_2 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "observation_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_obs_02.jpg'"
+        rename_3 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "observation_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_obs_03.jpg'"
+        rename_4 = "'DCIM/" + layer_name + "/'" + ' || (CASE WHEN "no_name_on_list" != 1 THEN "observation_name" ELSE "name_proposition" END) ||' + "'_'" + '|| "sample_id" ||' + "'_obs_04.jpg'"
+        custom_property_values = {
+            "picture_panel": rename_1,
+            "picture_general": rename_2,
+            "picture_detail": rename_3,
+            "picture_free": rename_4
+        }
+        custom_property_json = json.dumps(custom_property_values)
+        layer.setCustomProperty(custom_property_key, custom_property_json)
+
+        #Clean the form layout tab
+        config = layer.editFormConfig()
+        config.setLayout(1)
+        layer.setEditFormConfig(config)
+        root = config.invisibleRootContainer()
+        root.clear()
+
+        #Create sample metadata tab
+        sample_metadata = QgsAttributeEditorContainer("sample metadata", root)
+
+        #Define the fields
+        sample_name = QgsAttributeEditorField("observation_name", 1, sample_metadata)
+        no_name_on_list = QgsAttributeEditorField("no_name_on_list", 2, sample_metadata)
+        if_no_name_list = QgsAttributeEditorContainer("if_no_name_list", sample_metadata) #create the if_no_name_list tab
+        if_no_expression = QgsOptionalExpression(QgsExpression("no_name_on_list = 1")) #add the visibility expression
+        if_no_name_list.setVisibilityExpression(if_no_expression)
+        name_proposition = QgsAttributeEditorField("name_proposition", 3, if_no_name_list)
+        pictures = QgsAttributeEditorContainer("pictures", sample_metadata)
+        pictures_expression = QgsOptionalExpression(QgsExpression('"observation_name" IS NOT NULL AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
+        pictures.setVisibilityExpression(pictures_expression)
+        picture_general = QgsAttributeEditorField("picture_general", 4, sample_metadata)
+        picture_panel = QgsAttributeEditorField("picture_panel", 5, sample_metadata)
+        picture_detail = QgsAttributeEditorField("picture_detail", 6, sample_metadata)
+        picture_free = QgsAttributeEditorField("picture_free", 7, sample_metadata)
+        
+        #Construct the sample metadata tab structure
+        sample_metadata.addChildElement(sample_name)
+        sample_metadata.addChildElement(no_name_on_list)
+        if_no_name_list.addChildElement(name_proposition)
+        sample_metadata.addChildElement(if_no_name_list)
+        pictures.addChildElement(picture_general)
+        pictures.addChildElement(picture_panel)
+        pictures.addChildElement(picture_detail)
+        pictures.addChildElement(picture_free)
+        sample_metadata.addChildElement(pictures)
+        root.addChildElement(sample_metadata)
+
+        #Create individual metadata tab
+        individual_metadata = QgsAttributeEditorContainer("individual_metadata", root)
+        ipen = QgsAttributeEditorField("ipen", 1, individual_metadata)
+        herbivory = QgsAttributeEditorField("herbivory_(percent)", 2, individual_metadata)
+        comment_eco = QgsAttributeEditorField("comment_eco", 3, individual_metadata)
+        individual_metadata.addChildElement(ipen)
+        individual_metadata.addChildElement(herbivory)
+        individual_metadata.addChildElement(comment_eco)
+        root.addChildElement(individual_metadata)
+
+        #Create environmental metadata tab
+        environmental_metadata = QgsAttributeEditorContainer("environmental metadata", root)
+        soil = QgsAttributeEditorField("soil_type", 1, environmental_metadata)
+        weather = QgsAttributeEditorField("weather", 2, environmental_metadata)
+        temperature = QgsAttributeEditorField("temperature_(°C)", 3, environmental_metadata)
+        comment_env = QgsAttributeEditorField("comment_env", 4, environmental_metadata)
+        environmental_metadata.addChildElement(soil)
+        environmental_metadata.addChildElement(weather)
+        environmental_metadata.addChildElement(temperature)
+        environmental_metadata.addChildElement(comment_env)
+        root.addChildElement(environmental_metadata)
+        layer.setEditFormConfig(config)
+
+        #Display label for the points
+        label = QgsPalLayerSettings()
+        label.fieldName = "observation_name"
+        label.textcolor = QColor(0, 0, 0)
+        label.placement = QgsPalLayerSettings.OverPoint
+        layer.setLabelsEnabled(True)
+        layer.setLabeling(QgsVectorLayerSimpleLabeling(label))
+
+        #Show feature count
+        root = QgsProject.instance().layerTreeRoot()
+        layer_node = root.findLayer(imp_layer.id())
+        layer_node.setCustomProperty("showFeatureCount", 1)
