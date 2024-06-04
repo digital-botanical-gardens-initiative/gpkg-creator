@@ -1,7 +1,7 @@
 #/***************************************************************************
 # GpkgCreator
 #
-# Creates geopackages that match the requirements for the DBGI project
+# Creates geopackages that match the requirements for the EMI project
 #							 -------------------
 #		begin				: 2023-05-08
 #		git sha				: $Format:%H$
