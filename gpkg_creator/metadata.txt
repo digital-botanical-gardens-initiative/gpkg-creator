@@ -10,11 +10,10 @@ version=0.3
 author=Edouard Brülhart
 email=edouard.bruelhart@unifr.ch
 
-about=This plugin creates geopackages that match the requirements for the EMI project. Takes three arguments:
-    1. The name of your geopackage
-    2. The name of a CSV or geopackage file rhat contains the binomial nomenclature of the species you will collect (must be loaded on the project)
-    3. The column name containing the binomial nomenclature in the CSV or geopackage file
-    It can also update deprecated geopackes from older plugin versions
+about=This plugin creates geopackages that match the requirements for the EMI project:
+    1. Creates collection layers
+    2. Updates deprecated collection layers
+    3. Creates observation layers
 
 tracker=https://github.com/digital-botanical-gardens-initiative/gpkg_creator/issues
 repository=https://github.com/digital-botanical-gardens-initiative/gpkg_creator
@@ -26,10 +25,10 @@ hasProcessingProvider=no
 # Uncomment the following line and add your changelog:
 changelog=0.1 - First release
           0.2 - Adds some fields and reorganizes new features form. Add a function to update deprecated geopackages
-          0.3 - Makes the plugin compatible with other projects than DBGI
+          0.3 - Makes the plugin compatible with other projects than DBGI. Add a function to create observation geopackages
 
 # Tags are comma separated with spaces allowed
-tags=geopackage, gpkg, emi
+tags=geopackage, gpkg, emi, dbgi
 
 homepage=https://www.dbgi.org/dendron-dbgi/notes/1u37mlza55e6dgksabcv7qn/
 category=Vector
