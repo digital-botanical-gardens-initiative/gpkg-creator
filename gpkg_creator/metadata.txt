@@ -6,7 +6,7 @@
 name=EMI
 qgisMinimumVersion=3.0
 description=Creates geopackages that match the requirements for the EMI project
-version=0.3
+version=0.4
 author=Edouard Brülhart
 email=edouard.bruelhart@unifr.ch
 
@@ -26,6 +26,7 @@ hasProcessingProvider=no
 changelog=0.1 - First release
           0.2 - Adds some fields and reorganizes new features form. Add a function to update deprecated geopackages
           0.3 - Makes the plugin compatible with other projects than DBGI. Add a function to create observation geopackages
+          0.4 - Just corrected a little bug about taxon_name field (that replaced sample_name). In the pictures renaming expression, sample_name was still there in place of taxon_name
 
 # Tags are comma separated with spaces allowed
 tags=geopackage, gpkg, emi, dbgi
