@@ -553,90 +553,98 @@ class GpkgCreator:
         field_def3.SetWidth(200)
         layer.CreateField(field_def3)
 
-        field_def4 = ogr.FieldDefn("taxon_name", ogr.OFTString)
+        field_def4 = ogr.FieldDefn("is_wild", ogr.OFTString)
         field_def4.SetWidth(200)
         layer.CreateField(field_def4)
 
-        field_def5 = ogr.FieldDefn("no_name_on_list", ogr.OFTString)
+        field_def5 = ogr.FieldDefn("taxon_name", ogr.OFTString)
         field_def5.SetWidth(200)
         layer.CreateField(field_def5)
 
-        field_def6 = ogr.FieldDefn("name_proposition", ogr.OFTString)
+        field_def6 = ogr.FieldDefn("no_name_on_list", ogr.OFTString)
         field_def6.SetWidth(200)
         layer.CreateField(field_def6)
 
-        field_def7 = ogr.FieldDefn("sample_id", ogr.OFTString)
-        field_def7.SetWidth(15)
+        field_def7 = ogr.FieldDefn("name_proposition", ogr.OFTString)
+        field_def7.SetWidth(200)
         layer.CreateField(field_def7)
 
-        field_def8 = ogr.FieldDefn("picture_panel", ogr.OFTString)
-        field_def8.SetWidth(200)
+        field_def8 = ogr.FieldDefn("sample_id", ogr.OFTString)
+        field_def8.SetWidth(15)
         layer.CreateField(field_def8)
 
-        field_def9 = ogr.FieldDefn("picture_general", ogr.OFTString)
+        field_def9 = ogr.FieldDefn("picture_panel", ogr.OFTString)
         field_def9.SetWidth(200)
         layer.CreateField(field_def9)
 
-        field_def10 = ogr.FieldDefn("picture_detail", ogr.OFTString)
+        field_def10 = ogr.FieldDefn("picture_general", ogr.OFTString)
         field_def10.SetWidth(200)
         layer.CreateField(field_def10)
 
-        field_def11 = ogr.FieldDefn("picture_cut", ogr.OFTString)
+        field_def11 = ogr.FieldDefn("picture_detail", ogr.OFTString)
         field_def11.SetWidth(200)
         layer.CreateField(field_def11)
 
-        field_def12 = ogr.FieldDefn("picture_panel_label", ogr.OFTString)
+        field_def12 = ogr.FieldDefn("picture_cut", ogr.OFTString)
         field_def12.SetWidth(200)
         layer.CreateField(field_def12)
-        
-        field_def13 = ogr.FieldDefn("picture_free", ogr.OFTString)
+
+        field_def13 = ogr.FieldDefn("picture_panel_label", ogr.OFTString)
         field_def13.SetWidth(200)
         layer.CreateField(field_def13)
-
-        field_def14 = ogr.FieldDefn("x_coord", ogr.OFTReal)
-        field_def14.SetPrecision(0)
+        
+        field_def14 = ogr.FieldDefn("picture_free", ogr.OFTString)
+        field_def14.SetWidth(200)
         layer.CreateField(field_def14)
 
-        field_def15 = ogr.FieldDefn("y_coord", ogr.OFTReal)
+        field_def15 = ogr.FieldDefn("x_coord", ogr.OFTReal)
         field_def15.SetPrecision(0)
         layer.CreateField(field_def15)
 
-        #Creation of the individual metadata fields
-        field_def16 = ogr.FieldDefn("ipen", ogr.OFTString)
-        field_def16.SetWidth(200)
+        field_def16 = ogr.FieldDefn("y_coord", ogr.OFTReal)
+        field_def16.SetPrecision(0)
         layer.CreateField(field_def16)
 
-        field_def17 = ogr.FieldDefn("herbivory_(percent)", ogr.OFTInteger)
+        #Creation of the individual metadata fields
+        field_def17 = ogr.FieldDefn("ipen", ogr.OFTString)
+        field_def17.SetWidth(200)
         layer.CreateField(field_def17)
 
-        field_def18 = ogr.FieldDefn("comment_eco", ogr.OFTString)
-        field_def18.SetWidth(1000)
+        field_def18 = ogr.FieldDefn("herbivory_(percent)", ogr.OFTInteger)
         layer.CreateField(field_def18)
 
-        #Creation of the environmental metadata fields
-        field_def19 = ogr.FieldDefn("soil_type", ogr.OFTString)
-        field_def19.SetWidth(200)
+        field_def19 = ogr.FieldDefn("comment_eco", ogr.OFTString)
+        field_def19.SetWidth(1000)
         layer.CreateField(field_def19)
 
-        field_def20 = ogr.FieldDefn("weather", ogr.OFTString)
+        #Creation of the environmental metadata fields
+        field_def20 = ogr.FieldDefn("soil_type", ogr.OFTString)
         field_def20.SetWidth(200)
         layer.CreateField(field_def20)
 
-        field_def21 = ogr.FieldDefn("temperature_(°C)", ogr.OFTReal)
-        field_def21.SetPrecision(0)
+        field_def21 = ogr.FieldDefn("weather", ogr.OFTString)
+        field_def21.SetWidth(200)
         layer.CreateField(field_def21)
 
-        field_def22 = ogr.FieldDefn("comment_env", ogr.OFTString)
-        field_def22.SetWidth(1000)
+        field_def22 = ogr.FieldDefn("temperature_(°C)", ogr.OFTReal)
+        field_def22.SetPrecision(0)
         layer.CreateField(field_def22)
 
-        field_def23 = ogr.FieldDefn("date", ogr.OFTString)
-        field_def23.SetWidth(200)
+        field_def23 = ogr.FieldDefn("comment_env", ogr.OFTString)
+        field_def23.SetWidth(1000)
         layer.CreateField(field_def23)
 
-        field_def24 = ogr.FieldDefn("collector_orcid", ogr.OFTString)
-        field_def24.SetWidth(1000)
+        field_def24 = ogr.FieldDefn("date", ogr.OFTString)
+        field_def24.SetWidth(200)
         layer.CreateField(field_def24)
+
+        field_def25 = ogr.FieldDefn("collector_orcid", ogr.OFTString)
+        field_def25.SetWidth(1000)
+        layer.CreateField(field_def25)
+
+        field_def26 = ogr.FieldDefn("collector_inat", ogr.OFTString)
+        field_def26.SetWidth(1000)
+        layer.CreateField(field_def26)
 
         #Close the GeoPackage file
         ds = None
@@ -735,68 +743,72 @@ class GpkgCreator:
         layer.setEditorWidgetSetup(3, checkbox)
         layer.setDefaultValueDefinition(3, QgsDefaultValue('1'))
 
+        #is_wild field properties
+        layer.setEditorWidgetSetup(4, checkbox)
+        layer.setDefaultValueDefinition(4, QgsDefaultValue('0'))
+
         #taxon_name field properties
         expr_constr_taxon = 'CASE WHEN "no_name_on_list" = 1 THEN "taxon_name" IS NULL ELSE "taxon_name" IS NOT NULL END'
-        layer.setConstraintExpression(4, expr_constr_taxon)
+        layer.setConstraintExpression(5, expr_constr_taxon)
         layer.setDisplayExpression(selected_field)
 
         #no_name_on_list field properties
-        layer.setEditorWidgetSetup(5, checkbox)
-        layer.setDefaultValueDefinition(5, QgsDefaultValue('0'))
+        layer.setEditorWidgetSetup(6, checkbox)
+        layer.setDefaultValueDefinition(6, QgsDefaultValue('0'))
 
         #name_proposition field properties
         expr_constr_name = 'CASE WHEN "no_name_on_list" = 0 THEN "name_proposition" IS NULL ELSE "name_proposition" IS NOT NULL END'
-        layer.setConstraintExpression(6, expr_constr_name)
+        layer.setConstraintExpression(7, expr_constr_name)
 
         #sample_id field properties
         expr_constr = f'regexp_match(to_string("sample_id"), \'{project_name}_[0-9]{{6}}\')'
-        layer.setFieldConstraint(7, QgsFieldConstraints.ConstraintNotNull)
-        layer.setFieldConstraint(7, QgsFieldConstraints.ConstraintUnique)
-        layer.setConstraintExpression(7, expr_constr)
+        layer.setFieldConstraint(8, QgsFieldConstraints.ConstraintNotNull)
+        layer.setFieldConstraint(8, QgsFieldConstraints.ConstraintUnique)
+        layer.setConstraintExpression(8, expr_constr)
 
         #picture_panel field properties
-        layer.setFieldConstraint(8, QgsFieldConstraints.ConstraintNotNull)
-        layer.setEditorWidgetSetup(8, attach)
-
-        #picture_general field properties
         layer.setFieldConstraint(9, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(9, attach)
 
-        #picture_detail field properties
+        #picture_general field properties
         layer.setFieldConstraint(10, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(10, attach)
 
-        #picture_cut field properties
+        #picture_detail field properties
         layer.setFieldConstraint(11, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(11, attach)
 
-        #picture_panel_label field properties
+        #picture_cut field properties
         layer.setFieldConstraint(12, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(12, attach)
 
-        #picture_free field properties
+        #picture_panel_label field properties
+        layer.setFieldConstraint(13, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(13, attach)
+
+        #picture_free field properties
+        layer.setEditorWidgetSetup(14, attach)
 
         #x_coord field properties
         coord_x = QgsDefaultValue("$x")
-        layer.setDefaultValueDefinition(14, coord_x)
+        layer.setDefaultValueDefinition(15, coord_x)
 
         #y_coord field properties
         coord_y = QgsDefaultValue("$y")
-        layer.setDefaultValueDefinition(15, coord_y)
+        layer.setDefaultValueDefinition(16, coord_y)
 
         #ipen field properties
         
         #herbivory_(percent) field properties
-        layer.setEditorWidgetSetup(17, range)
+        layer.setEditorWidgetSetup(18, range)
 
         #comment_eco field properties
 
         #soil_type field properties
-        layer.setEditorWidgetSetup(19, form_soil)
+        layer.setEditorWidgetSetup(20, form_soil)
 
         #weather field properties
-        layer.setEditorWidgetSetup(20, form_weather)
+        layer.setEditorWidgetSetup(21, form_weather)
 
         #temperature_(°C) field properties
 
@@ -804,11 +816,15 @@ class GpkgCreator:
 
         # date field properties
         date = QgsDefaultValue("format_date(now(), 'yyyyMMddHHmmss')")
-        layer.setDefaultValueDefinition(23, date)
+        layer.setDefaultValueDefinition(24, date)
 
         # collector_orcid field properties
-        layer.setDefaultValueDefinition(24, QgsDefaultValue('attribute(get_feature(\'collector_list\', \'fullname\', "collector_fullname"), \'ORCID\')', True))
-        layer.setFieldConstraint(24, QgsFieldConstraints.ConstraintNotNull)
+        layer.setDefaultValueDefinition(25, QgsDefaultValue('attribute(get_feature(\'collector_list\', \'fullname\', "collector_fullname"), \'ORCID\')', True))
+        layer.setFieldConstraint(25, QgsFieldConstraints.ConstraintNotNull)
+
+        # collector_inat field properties
+        layer.setDefaultValueDefinition(26, QgsDefaultValue('attribute(get_feature(\'collector_list\', \'fullname\', "collector_fullname"), \'iNat_username\')', True))
+        layer.setFieldConstraint(26, QgsFieldConstraints.ConstraintNotNull)
 
 
         #Change picture naming for the five concerned fields for QField
@@ -849,27 +865,29 @@ class GpkgCreator:
         collector_fullname = QgsAttributeEditorField("collector_fullname", 1, sample_metadata)
         observation_subject = QgsAttributeEditorField("observation_subject", 2, sample_metadata)
         inat_upload = QgsAttributeEditorField("inat_upload", 3, sample_metadata)
-        taxon_name = QgsAttributeEditorField("taxon_name", 4, sample_metadata)
-        no_name_on_list = QgsAttributeEditorField("no_name_on_list", 5, sample_metadata)
+        is_wild = QgsAttributeEditorField("is_wild", 4, sample_metadata)
+        taxon_name = QgsAttributeEditorField("taxon_name", 5, sample_metadata)
+        no_name_on_list = QgsAttributeEditorField("no_name_on_list", 6, sample_metadata)
         if_no_name_list = QgsAttributeEditorContainer("if_no_name_list", sample_metadata) #create the if_no_name_list tab
         if_no_expression = QgsOptionalExpression(QgsExpression("no_name_on_list = 1")) #add the visibility expression
         if_no_name_list.setVisibilityExpression(if_no_expression)
-        name_proposition = QgsAttributeEditorField("name_proposition", 6, if_no_name_list)
-        sample_id = QgsAttributeEditorField("sample_id", 7, sample_metadata)
+        name_proposition = QgsAttributeEditorField("name_proposition", 7, if_no_name_list)
+        sample_id = QgsAttributeEditorField("sample_id", 8, sample_metadata)
         pictures = QgsAttributeEditorContainer("pictures", sample_metadata)
-        pictures_expression = QgsOptionalExpression(QgsExpression('regexp_match(to_string("sample_id"),' + f"'{project_name}_[0-9]{{6}}') AND " + '"taxon_name" IS NOT NULL AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
+        pictures_expression = QgsOptionalExpression(QgsExpression('regexp_match(to_string("sample_id"),' + f"'{project_name}_[0-9]{{6}}') AND " + '(if("no_name_on_list" = 0, "taxon_name" IS NOT NULL, TRUE)) AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
         pictures.setVisibilityExpression(pictures_expression)
-        picture_general = QgsAttributeEditorField("picture_general", 8, sample_metadata)
-        picture_panel = QgsAttributeEditorField("picture_panel", 9, sample_metadata)
-        picture_panel_label = QgsAttributeEditorField("picture_panel_label", 10, sample_metadata)
-        picture_detail = QgsAttributeEditorField("picture_detail", 11, sample_metadata)
-        picture_cut = QgsAttributeEditorField("picture_cut", 12, sample_metadata)
-        picture_free = QgsAttributeEditorField("picture_free", 13, sample_metadata)
+        picture_general = QgsAttributeEditorField("picture_general", 9, sample_metadata)
+        picture_panel = QgsAttributeEditorField("picture_panel", 10, sample_metadata)
+        picture_panel_label = QgsAttributeEditorField("picture_panel_label", 11, sample_metadata)
+        picture_detail = QgsAttributeEditorField("picture_detail", 12, sample_metadata)
+        picture_cut = QgsAttributeEditorField("picture_cut", 13, sample_metadata)
+        picture_free = QgsAttributeEditorField("picture_free", 14, sample_metadata)
         
         #Construct the sample metadata tab structure
         sample_metadata.addChildElement(collector_fullname)
         sample_metadata.addChildElement(observation_subject)
         sample_metadata.addChildElement(inat_upload)
+        sample_metadata.addChildElement(is_wild)
         sample_metadata.addChildElement(taxon_name)
         sample_metadata.addChildElement(no_name_on_list)
         if_no_name_list.addChildElement(name_proposition)
@@ -990,92 +1008,100 @@ class GpkgCreator:
         if fields.indexOf("inat_upload") == -1:
             field_def3 = QgsField("inat_upload", QVariant.String)
             layer.dataProvider().addAttributes([field_def3])
+
+        if fields.indexOf("is_wild") == -1:
+            field_def4 = QgsField("is_wild", QVariant.String)
+            layer.dataProvider().addAttributes([field_def4])
         
         if fields.indexOf("taxon_name") == -1:
-            field_def4 = QgsField("taxon_name", QVariant.String)
-            layer.dataProvider().addAttributes([field_def4])
-
-        if fields.indexOf("no_name_on_list") == -1:
-            field_def5 = QgsField("no_name_on_list", QVariant.String)
+            field_def5 = QgsField("taxon_name", QVariant.String)
             layer.dataProvider().addAttributes([field_def5])
 
-        if fields.indexOf("name_proposition") == -1:
-            field_def6 = QgsField("name_proposition", QVariant.String)
+        if fields.indexOf("no_name_on_list") == -1:
+            field_def6 = QgsField("no_name_on_list", QVariant.String)
             layer.dataProvider().addAttributes([field_def6])
 
-        if fields.indexOf("sample_id") == -1:
-            field_def7 = QgsField("sample_id", QVariant.String)
+        if fields.indexOf("name_proposition") == -1:
+            field_def7 = QgsField("name_proposition", QVariant.String)
             layer.dataProvider().addAttributes([field_def7])
 
-        if fields.indexOf("picture_panel") == -1:
-            field_def8 = QgsField("picture_panel", QVariant.String)
+        if fields.indexOf("sample_id") == -1:
+            field_def8 = QgsField("sample_id", QVariant.String)
             layer.dataProvider().addAttributes([field_def8])
+
+        if fields.indexOf("picture_panel") == -1:
+            field_def9 = QgsField("picture_panel", QVariant.String)
+            layer.dataProvider().addAttributes([field_def9])
             
         if fields.indexOf("picture_general") == -1:
-            field_def9 = QgsField("picture_general", QVariant.String)
-            layer.dataProvider().addAttributes([field_def9])
-
-        if fields.indexOf("picture_detail") == -1:
-            field_def10 = QgsField("picture_detail", QVariant.String)
+            field_def10 = QgsField("picture_general", QVariant.String)
             layer.dataProvider().addAttributes([field_def10])
 
-        if fields.indexOf("picture_cut") == -1:
-            field_def11 = QgsField("picture_cut", QVariant.String)
+        if fields.indexOf("picture_detail") == -1:
+            field_def11 = QgsField("picture_detail", QVariant.String)
             layer.dataProvider().addAttributes([field_def11])
 
-        if fields.indexOf("picture_panel_label") == -1:
-            field_def12 = QgsField("picture_panel_label", QVariant.String)
+        if fields.indexOf("picture_cut") == -1:
+            field_def12 = QgsField("picture_cut", QVariant.String)
             layer.dataProvider().addAttributes([field_def12])
 
-        if fields.indexOf("picture_free") == -1:
-            field_def13 = QgsField("picture_free", QVariant.String)
+        if fields.indexOf("picture_panel_label") == -1:
+            field_def13 = QgsField("picture_panel_label", QVariant.String)
             layer.dataProvider().addAttributes([field_def13])
+
+        if fields.indexOf("picture_free") == -1:
+            field_def14 = QgsField("picture_free", QVariant.String)
+            layer.dataProvider().addAttributes([field_def14])
         
         if fields.indexOf("x_coord") == -1:
-            field_def14 = QgsField("x_coord", QVariant.Double)
-            layer.dataProvider().addAttributes([field_def14])
+            field_def15 = QgsField("x_coord", QVariant.Double)
+            layer.dataProvider().addAttributes([field_def15])
 
         if fields.indexOf("y_coord") == -1:
-            field_def15 = QgsField("y_coord", QVariant.Double)
-            layer.dataProvider().addAttributes([field_def15])
+            field_def16 = QgsField("y_coord", QVariant.Double)
+            layer.dataProvider().addAttributes([field_def16])
 
         #Creation of the individual metadata fields
         if fields.indexOf("ipen") == -1:
-            field_def16 = QgsField("ipen", QVariant.String)
-            layer.dataProvider().addAttributes([field_def16])
-
-        if fields.indexOf("herbivory_(percent)") == -1:
-            field_def17 = QgsField("herbivory_(percent)", QVariant.Int)
+            field_def17 = QgsField("ipen", QVariant.String)
             layer.dataProvider().addAttributes([field_def17])
 
-        if fields.indexOf("comment_eco") == -1:
-            field_def18 = QgsField("comment_eco", QVariant.String)
+        if fields.indexOf("herbivory_(percent)") == -1:
+            field_def18 = QgsField("herbivory_(percent)", QVariant.Int)
             layer.dataProvider().addAttributes([field_def18])
+
+        if fields.indexOf("comment_eco") == -1:
+            field_def19 = QgsField("comment_eco", QVariant.String)
+            layer.dataProvider().addAttributes([field_def19])
 
         #Creation of the environmental metadata fields
         if fields.indexOf("soil_type") == -1:
-            field_def19 = QgsField("soil_type", QVariant.String)
-            layer.dataProvider().addAttributes([field_def19])
-
-        if fields.indexOf("weather") == -1:
-            field_def20 = QgsField("weather", QVariant.String)
+            field_def20 = QgsField("soil_type", QVariant.String)
             layer.dataProvider().addAttributes([field_def20])
 
-        if fields.indexOf("temperature_(°C)") == -1:
-            field_def21 = QgsField("temperature_(°C)", QVariant.Double)
+        if fields.indexOf("weather") == -1:
+            field_def21 = QgsField("weather", QVariant.String)
             layer.dataProvider().addAttributes([field_def21])
 
-        if fields.indexOf("comment_env") == -1:
-            field_def22 = QgsField("comment_env", QVariant.String)
+        if fields.indexOf("temperature_(°C)") == -1:
+            field_def22 = QgsField("temperature_(°C)", QVariant.Double)
             layer.dataProvider().addAttributes([field_def22])
 
-        if fields.indexOf("date") == -1:
-            field_def23 = QgsField("date", QVariant.String)
+        if fields.indexOf("comment_env") == -1:
+            field_def23 = QgsField("comment_env", QVariant.String)
             layer.dataProvider().addAttributes([field_def23])
 
-        if fields.indexOf("collector_orcid") == -1:
-            field_def24 = QgsField("collector_orcid", QVariant.String)
+        if fields.indexOf("date") == -1:
+            field_def24 = QgsField("date", QVariant.String)
             layer.dataProvider().addAttributes([field_def24])
+
+        if fields.indexOf("collector_orcid") == -1:
+            field_def25 = QgsField("collector_orcid", QVariant.String)
+            layer.dataProvider().addAttributes([field_def25])
+
+        if fields.indexOf("collector_inat") == -1:
+            field_def26 = QgsField("collector_inat", QVariant.String)
+            layer.dataProvider().addAttributes([field_def26])
 
         layer.updateFields()
        
@@ -1174,6 +1200,11 @@ class GpkgCreator:
         layer.setEditorWidgetSetup(inat_upload_index, checkbox)
         layer.setDefaultValueDefinition(inat_upload_index, QgsDefaultValue('1'))
 
+        #is_wild field properties
+        is_wild_index = fields.indexOf("is_wild")
+        layer.setEditorWidgetSetup(is_wild_index, checkbox)
+        layer.setDefaultValueDefinition(is_wild_index, QgsDefaultValue('0'))
+
         #taxon_name field properties
         taxon_name_index = fields.indexOf("taxon_name")
         expr_constr_taxon = 'CASE WHEN "no_name_on_list" = 1 THEN "taxon_name" IS NULL ELSE "taxon_name" IS NOT NULL END'
@@ -1259,6 +1290,11 @@ class GpkgCreator:
         layer.setDefaultValueDefinition(collector_orcid_index, QgsDefaultValue('attribute(get_feature(\'collector_list\', \'fullname\', "collector_fullname"), \'ORCID\')', True))
         layer.setFieldConstraint(collector_orcid_index, QgsFieldConstraints.ConstraintNotNull)
 
+        # collector_inat field properties
+        collector_inat_index = fields.indexOf("collector_inat")
+        layer.setDefaultValueDefinition(collector_inat_index, QgsDefaultValue('attribute(get_feature(\'collector_list\', \'fullname\', "collector_fullname"), \'iNat_username\')', True))
+        layer.setFieldConstraint(collector_inat_index, QgsFieldConstraints.ConstraintNotNull)
+
 
         #Change picture naming for the five concerned fields for QField
         custom_attachment = "QFieldSync/attachment_naming"
@@ -1298,6 +1334,7 @@ class GpkgCreator:
         collector_fullname = QgsAttributeEditorField("collector_fullname", collector_fullname_index, sample_metadata)
         observation_subject = QgsAttributeEditorField("observation_subject", observation_subject_index, sample_metadata)
         inat_upload = QgsAttributeEditorField("inat_upload", inat_upload_index, sample_metadata)
+        is_wild = QgsAttributeEditorField("is_wild", is_wild_index, sample_metadata)
         taxon_name = QgsAttributeEditorField("taxon_name", taxon_name_index, sample_metadata)
         no_name_on_list = QgsAttributeEditorField("no_name_on_list", no_name_on_list_index, sample_metadata)
         if_no_name_list = QgsAttributeEditorContainer("if_no_name_list", sample_metadata) #create the if_no_name_list tab
@@ -1307,7 +1344,7 @@ class GpkgCreator:
         sample_id_index = fields.indexOf("sample_id")
         sample_id = QgsAttributeEditorField("sample_id", sample_id_index, sample_metadata)
         pictures = QgsAttributeEditorContainer("pictures", sample_metadata)
-        pictures_expression = QgsOptionalExpression(QgsExpression('regexp_match(to_string("sample_id"),' + f"'{project_name}_[0-9]{{6}}') AND " + '"taxon_name" IS NOT NULL AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
+        pictures_expression = QgsOptionalExpression(QgsExpression('regexp_match(to_string("sample_id"),' + f"'{project_name}_[0-9]{{6}}') AND " + '(if("no_name_on_list" = 0, "taxon_name" IS NOT NULL, TRUE)) AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
         pictures.setVisibilityExpression(pictures_expression)
         picture_general = QgsAttributeEditorField("picture_general", picture_general_index, sample_metadata)
         picture_panel = QgsAttributeEditorField("picture_panel", picture_panel_index, sample_metadata)
@@ -1320,6 +1357,7 @@ class GpkgCreator:
         sample_metadata.addChildElement(collector_fullname)
         sample_metadata.addChildElement(observation_subject)
         sample_metadata.addChildElement(inat_upload)
+        sample_metadata.addChildElement(is_wild)
         sample_metadata.addChildElement(taxon_name)
         sample_metadata.addChildElement(no_name_on_list)
         if_no_name_list.addChildElement(name_proposition)
@@ -1425,18 +1463,22 @@ class GpkgCreator:
         field_def3 = ogr.FieldDefn("inat_upload", ogr.OFTString)
         field_def3.SetWidth(200)
         layer.CreateField(field_def3)
-
-        field_def4 = ogr.FieldDefn("taxon_name", ogr.OFTString)
+        
+        field_def4 = ogr.FieldDefn("is_wild", ogr.OFTString)
         field_def4.SetWidth(200)
         layer.CreateField(field_def4)
 
-        field_def5 = ogr.FieldDefn("no_name_on_list", ogr.OFTString)
+        field_def5 = ogr.FieldDefn("taxon_name", ogr.OFTString)
         field_def5.SetWidth(200)
         layer.CreateField(field_def5)
 
-        field_def6 = ogr.FieldDefn("name_proposition", ogr.OFTString)
+        field_def6 = ogr.FieldDefn("no_name_on_list", ogr.OFTString)
         field_def6.SetWidth(200)
         layer.CreateField(field_def6)
+
+        field_def7 = ogr.FieldDefn("name_proposition", ogr.OFTString)
+        field_def7.SetWidth(200)
+        layer.CreateField(field_def7)
 
         field_def8 = ogr.FieldDefn("picture_panel", ogr.OFTString)
         field_def8.SetWidth(200)
@@ -1450,54 +1492,58 @@ class GpkgCreator:
         field_def10.SetWidth(200)
         layer.CreateField(field_def10)
         
-        field_def13 = ogr.FieldDefn("picture_free", ogr.OFTString)
-        field_def13.SetWidth(200)
+        field_def11 = ogr.FieldDefn("picture_free", ogr.OFTString)
+        field_def11.SetWidth(200)
+        layer.CreateField(field_def11)
+
+        field_def12 = ogr.FieldDefn("x_coord", ogr.OFTReal)
+        field_def12.SetPrecision(0)
+        layer.CreateField(field_def12)
+
+        field_def13 = ogr.FieldDefn("y_coord", ogr.OFTReal)
+        field_def13.SetPrecision(0)
         layer.CreateField(field_def13)
 
-        field_def14 = ogr.FieldDefn("x_coord", ogr.OFTReal)
-        field_def14.SetPrecision(0)
+        #Creation of the individual metadata fields
+        field_def14 = ogr.FieldDefn("ipen", ogr.OFTString)
+        field_def14.SetWidth(200)
         layer.CreateField(field_def14)
 
-        field_def15 = ogr.FieldDefn("y_coord", ogr.OFTReal)
-        field_def15.SetPrecision(0)
+        field_def15 = ogr.FieldDefn("herbivory_(percent)", ogr.OFTInteger)
         layer.CreateField(field_def15)
 
-        #Creation of the individual metadata fields
-        field_def16 = ogr.FieldDefn("ipen", ogr.OFTString)
-        field_def16.SetWidth(200)
+        field_def16 = ogr.FieldDefn("comment_eco", ogr.OFTString)
+        field_def16.SetWidth(1000)
         layer.CreateField(field_def16)
 
-        field_def17 = ogr.FieldDefn("herbivory_(percent)", ogr.OFTInteger)
+        #Creation of the environmental metadata fields
+        field_def17 = ogr.FieldDefn("soil_type", ogr.OFTString)
+        field_def17.SetWidth(200)
         layer.CreateField(field_def17)
 
-        field_def18 = ogr.FieldDefn("comment_eco", ogr.OFTString)
-        field_def18.SetWidth(1000)
+        field_def18 = ogr.FieldDefn("weather", ogr.OFTString)
+        field_def18.SetWidth(200)
         layer.CreateField(field_def18)
 
-        #Creation of the environmental metadata fields
-        field_def19 = ogr.FieldDefn("soil_type", ogr.OFTString)
-        field_def19.SetWidth(200)
+        field_def19 = ogr.FieldDefn("temperature_(°C)", ogr.OFTReal)
+        field_def19.SetPrecision(0)
         layer.CreateField(field_def19)
 
-        field_def20 = ogr.FieldDefn("weather", ogr.OFTString)
-        field_def20.SetWidth(200)
+        field_def20 = ogr.FieldDefn("comment_env", ogr.OFTString)
+        field_def20.SetWidth(1000)
         layer.CreateField(field_def20)
 
-        field_def21 = ogr.FieldDefn("temperature_(°C)", ogr.OFTReal)
-        field_def21.SetPrecision(0)
+        field_def21 = ogr.FieldDefn("date", ogr.OFTString)
+        field_def21.SetWidth(200)
         layer.CreateField(field_def21)
 
-        field_def22 = ogr.FieldDefn("comment_env", ogr.OFTString)
+        field_def22 = ogr.FieldDefn("collector_orcid", ogr.OFTString)
         field_def22.SetWidth(1000)
         layer.CreateField(field_def22)
 
-        field_def23 = ogr.FieldDefn("date", ogr.OFTString)
-        field_def23.SetWidth(200)
+        field_def23 = ogr.FieldDefn("collector_inat", ogr.OFTString)
+        field_def23.SetWidth(1000)
         layer.CreateField(field_def23)
-
-        field_def24 = ogr.FieldDefn("collector_orcid", ogr.OFTString)
-        field_def24.SetWidth(1000)
-        layer.CreateField(field_def24)
 
         #Close the GeoPackage file
         ds = None
@@ -1577,54 +1623,58 @@ class GpkgCreator:
         layer.setEditorWidgetSetup(2, checkbox)
         layer.setDefaultValueDefinition(2, QgsDefaultValue('1'))
 
+        #is_wild field properties
+        layer.setEditorWidgetSetup(3, checkbox)
+        layer.setDefaultValueDefinition(3, QgsDefaultValue('0'))
+
         #taxon_name field properties
         expr_constr_taxon = 'CASE WHEN "no_name_on_list" = 1 THEN "taxon_name" IS NULL ELSE "taxon_name" IS NOT NULL END'
-        layer.setConstraintExpression(3, expr_constr_taxon)
+        layer.setConstraintExpression(4, expr_constr_taxon)
         layer.setDisplayExpression(selected_field)
 
         #no_name_on_list field properties
-        layer.setEditorWidgetSetup(4, checkbox)
-        layer.setDefaultValueDefinition(4, QgsDefaultValue('0'))
+        layer.setEditorWidgetSetup(5, checkbox)
+        layer.setDefaultValueDefinition(5, QgsDefaultValue('0'))
 
         #name_proposition field properties
         expr_constr_name = 'CASE WHEN "no_name_on_list" = 0 THEN "name_proposition" IS NULL ELSE "name_proposition" IS NOT NULL END'
-        layer.setConstraintExpression(5, expr_constr_name)
+        layer.setConstraintExpression(6, expr_constr_name)
 
         #picture_panel field properties
-        layer.setFieldConstraint(6, QgsFieldConstraints.ConstraintNotNull)
-        layer.setEditorWidgetSetup(6, attach)
-
-        #picture_general field properties
         layer.setFieldConstraint(7, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(7, attach)
 
-        #picture_detail field properties
+        #picture_general field properties
         layer.setFieldConstraint(8, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(8, attach)
 
-        #picture_free field properties
+        #picture_detail field properties
+        layer.setFieldConstraint(9, QgsFieldConstraints.ConstraintNotNull)
         layer.setEditorWidgetSetup(9, attach)
+
+        #picture_free field properties
+        layer.setEditorWidgetSetup(10, attach)
 
         #x_coord field properties
         coord_x = QgsDefaultValue("$x")
-        layer.setDefaultValueDefinition(10, coord_x)
+        layer.setDefaultValueDefinition(11, coord_x)
 
         #y_coord field properties
         coord_y = QgsDefaultValue("$y")
-        layer.setDefaultValueDefinition(11, coord_y)
+        layer.setDefaultValueDefinition(12, coord_y)
 
         #ipen field properties
         
         #herbivory_(percent) field properties
-        layer.setEditorWidgetSetup(13, range)
+        layer.setEditorWidgetSetup(14, range)
 
         #comment_eco field properties
 
         #soil_type field properties
-        layer.setEditorWidgetSetup(15, form_soil)
+        layer.setEditorWidgetSetup(16, form_soil)
 
         #weather field properties
-        layer.setEditorWidgetSetup(16, form_weather)
+        layer.setEditorWidgetSetup(17, form_weather)
 
         #temperature_(°C) field properties
 
@@ -1632,11 +1682,15 @@ class GpkgCreator:
 
         # date field properties
         date = QgsDefaultValue("format_date(now(), 'yyyyMMddHHmmss')")
-        layer.setDefaultValueDefinition(19, date)
+        layer.setDefaultValueDefinition(20, date)
 
         # collector_orcid field properties
-        layer.setDefaultValueDefinition(20, QgsDefaultValue('attribute(get_feature(\'collector_list\', \'fullname\', "collector_fullname"), \'ORCID\')', True))
-        layer.setFieldConstraint(20, QgsFieldConstraints.ConstraintNotNull)
+        layer.setDefaultValueDefinition(21, QgsDefaultValue('attribute(get_feature(\'collector_list\', \'fullname\', "collector_fullname"), \'ORCID\')', True))
+        layer.setFieldConstraint(21, QgsFieldConstraints.ConstraintNotNull)
+
+        # collector_inat field properties
+        layer.setDefaultValueDefinition(22, QgsDefaultValue('attribute(get_feature(\'collector_list\', \'fullname\', "collector_fullname"), \'iNat_username\')', True))
+        layer.setFieldConstraint(22, QgsFieldConstraints.ConstraintNotNull)
 
 
         #Change picture naming for the five concerned fields for QField
@@ -1672,23 +1726,25 @@ class GpkgCreator:
         # Define the fields
         collector_fullname = QgsAttributeEditorField("collector_fullname", 1, sample_metadata)
         inat_upload = QgsAttributeEditorField("inat_upload", 2, sample_metadata)
-        taxon_name = QgsAttributeEditorField("taxon_name", 3, sample_metadata)
-        no_name_on_list = QgsAttributeEditorField("no_name_on_list", 4, sample_metadata)
+        is_wild = QgsAttributeEditorField("is_wild", 3, sample_metadata)
+        taxon_name = QgsAttributeEditorField("taxon_name", 4, sample_metadata)
+        no_name_on_list = QgsAttributeEditorField("no_name_on_list", 5, sample_metadata)
         if_no_name_list = QgsAttributeEditorContainer("if_no_name_list", sample_metadata) #create the if_no_name_list tab
         if_no_expression = QgsOptionalExpression(QgsExpression("no_name_on_list = 1")) #add the visibility expression
         if_no_name_list.setVisibilityExpression(if_no_expression)
-        name_proposition = QgsAttributeEditorField("name_proposition", 5, if_no_name_list)
+        name_proposition = QgsAttributeEditorField("name_proposition", 6, if_no_name_list)
         pictures = QgsAttributeEditorContainer("pictures", sample_metadata)
         pictures_expression = QgsOptionalExpression(QgsExpression('(if("no_name_on_list" = 0, "taxon_name" IS NOT NULL, TRUE)) AND (if("no_name_on_list" = 1, "name_proposition" IS NOT NULL, TRUE))'))
         pictures.setVisibilityExpression(pictures_expression)
-        picture_general = QgsAttributeEditorField("picture_general", 6, sample_metadata)
-        picture_panel = QgsAttributeEditorField("picture_panel", 7, sample_metadata)
-        picture_detail = QgsAttributeEditorField("picture_detail", 8, sample_metadata)
-        picture_free = QgsAttributeEditorField("picture_free", 9, sample_metadata)
+        picture_general = QgsAttributeEditorField("picture_general", 7, sample_metadata)
+        picture_panel = QgsAttributeEditorField("picture_panel", 8, sample_metadata)
+        picture_detail = QgsAttributeEditorField("picture_detail", 9, sample_metadata)
+        picture_free = QgsAttributeEditorField("picture_free", 10, sample_metadata)
         
         #Construct the sample metadata tab structure
         sample_metadata.addChildElement(collector_fullname)
         sample_metadata.addChildElement(inat_upload)
+        sample_metadata.addChildElement(is_wild)
         sample_metadata.addChildElement(taxon_name)
         sample_metadata.addChildElement(no_name_on_list)
         if_no_name_list.addChildElement(name_proposition)
