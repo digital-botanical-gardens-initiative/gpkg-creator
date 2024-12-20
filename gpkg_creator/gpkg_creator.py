@@ -474,8 +474,8 @@ class GpkgCreator:
 
     def run_create(self):
         #Extract the project names from directus
-        collection_url = "http://directus.dbgi.org/items/EMI_codes"
-        column = 'emi_code'
+        collection_url = "https://emi-collection.unifr.ch/directus/items/Projects"
+        column = 'project_id'
         params = {'sort[]': f'{column}'}
         session = requests.Session()
         response = session.get(collection_url, params=params)
@@ -940,8 +940,8 @@ class GpkgCreator:
 
     def run_modify(self):
         #Extract the project names from directus
-        collection_url = "http://directus.dbgi.org/items/EMI_codes"
-        column = 'emi_code'
+        collection_url = "https://emi-collection.unifr.ch/directus/items/Projects"
+        column = 'project_id'
         params = {'sort[]': f'{column}'}
         session = requests.Session()
         response = session.get(collection_url, params=params)
