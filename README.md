@@ -73,3 +73,14 @@ Changes QField attachment naming expression: permits to rename the pictures take
 Adds a label for displayed observation on the map.
 
 Shows layer feature count.
+
+# To build the plugin
+
+```bash
+cd gpkg-creator
+zip -r gpkg_creator_vXX.zip gpkg_creator -x "*.git*" "*.DS_Store" "pycache/*" "*.pyc" "*.pyo"
+```
+
+This can be directly loaded from QGIS.
+
+
