@@ -929,7 +929,10 @@ class GpkgCreator:
         label = QgsPalLayerSettings()
         label.fieldName = "sample_id"
         label.textcolor = QColor(0, 0, 0)
-        label.placement = QgsPalLayerSettings.OverPoint
+        if hasattr(QgsPalLayerSettings, "Placement"):
+            label.placement = QgsPalLayerSettings.Placement.OverPoint
+        else:
+            label.placement = QgsPalLayerSettings.OverPoint
         layer.setLabelsEnabled(True)
         layer.setLabeling(QgsVectorLayerSimpleLabeling(label))
 
@@ -1403,7 +1406,10 @@ class GpkgCreator:
         label = QgsPalLayerSettings()
         label.fieldName = "sample_id"
         label.textcolor = QColor(0, 0, 0)
-        label.placement = QgsPalLayerSettings.OverPoint
+        if hasattr(QgsPalLayerSettings, "Placement"):
+            label.placement = QgsPalLayerSettings.Placement.OverPoint
+        else:
+            label.placement = QgsPalLayerSettings.OverPoint
         layer.setLabelsEnabled(True)
         layer.setLabeling(QgsVectorLayerSimpleLabeling(label))
 
